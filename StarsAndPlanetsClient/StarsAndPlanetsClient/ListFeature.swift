@@ -16,8 +16,10 @@ struct ListFeature: Reducer {
 
   enum Action {
     case load
-    case resultsFetched(Result<[Star], Error>)
+    case resultsFetched(TaskResult<[Star]>)
     case newStar(String)
+    case starCreated(TaskResult<Void>)
+    case okTapped
   }
 
   @Dependency(\.client) var client
@@ -26,12 +28,9 @@ struct ListFeature: Reducer {
     switch action {
     case .load:
       return .task {
-        do {
-          let stars = try await client.fetchStars()
-          return .resultsFetched(.success(stars))
-        } catch {
-          return .resultsFetched(.failure(error))
-        }
+        await .resultsFetched(.init(catching: {
+          try await client.fetchStars()
+        }))
       }.animation()
     case let .resultsFetched(result):
       switch result {
@@ -44,9 +43,23 @@ struct ListFeature: Reducer {
       return .none
     case let .newStar(name):
       return .task {
-        _ = try await client.createStar(name)
-        return .load
+        await .starCreated(.init(catching: {
+          _ = try await client.createStar(name)
+        }))
       }
+    case let .starCreated(result):
+      switch result {
+      case .success:
+        return .task {
+          .load
+        }
+      case let .failure(error):
+        state.errorMessage = "Failed with: \(error.localizedDescription)"
+        return .none
+      }
+    case .okTapped:
+      state.errorMessage = nil
+      return .none
     }
   }
 }
@@ -84,6 +97,13 @@ struct ListView: View {
           viewStore.send(.newStar(name))
           isShowingSheet = false
         }
+      }
+      .alert("Something went wrong",
+             isPresented: viewStore.binding(get: {
+        $0.errorMessage != nil
+      }, send: .okTapped),
+             actions: { EmptyView() }) {
+        Text(viewStore.errorMessage ?? "")
       }
     }
   }
