@@ -1,0 +1,16 @@
+query Stars {
+  stars {
+    id
+    name
+    planets {
+      id
+      name
+    }
+  }
+}
+
+mutation NewStar($name: String!) {
+  createStar(name: $name) {
+    id
+  }
+}
