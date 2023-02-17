@@ -12,6 +12,7 @@ struct ListFeature: Reducer {
   struct State: Equatable {
     var stars: [Star] = []
     var errorMessage: String?
+    var selectedStar: Star?
   }
 
   enum Action {
@@ -20,6 +21,8 @@ struct ListFeature: Reducer {
     case newStar(String)
     case starCreated(TaskResult<Void>)
     case okTapped
+    case starSelected(Star)
+    case navigateBack
   }
 
   @Dependency(\.client) var client
@@ -60,6 +63,12 @@ struct ListFeature: Reducer {
     case .okTapped:
       state.errorMessage = nil
       return .none
+    case let .starSelected(star):
+      state.selectedStar = star
+      return .none
+    case .navigateBack:
+      state.selectedStar = nil
+      return .none
     }
   }
 }
@@ -85,6 +94,20 @@ struct ListView: View {
             VStack(alignment: .leading) {
               Text(star.name)
               Text("\(star.planets.count) planets")
+            }
+            .clipShape(Rectangle())
+            .onTapGesture {
+              viewStore.send(.starSelected(star))
+            }
+            .navigationDestination(
+              isPresented: viewStore.binding(get: { $0.selectedStar != nil },
+                                             send: .navigateBack)
+            ) {
+
+              if let star = viewStore.selectedStar {
+                DetailView(store: Store(initialState: DetailFeature.State(star: star),
+                                        reducer: DetailFeature()))
+              }
             }
           }
         }

@@ -14,3 +14,9 @@ mutation NewStar($name: String!) {
     id
   }
 }
+
+mutation NewPlanet($name: String!, $starID: UUID!) {
+  createPlanet(name: $name, starID: $starID) {
+    id
+  }
+}

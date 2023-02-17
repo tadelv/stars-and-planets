@@ -10,6 +10,8 @@
 		1832A971299E187100FF8310 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 1832A970299E187100FF8310 /* ComposableArchitecture */; };
 		1832A973299E1F6300FF8310 /* ListFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A972299E1F6300FF8310 /* ListFeature.swift */; };
 		1832A975299E214300FF8310 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A974299E214300FF8310 /* Client.swift */; };
+		1832A977299EA48400FF8310 /* DetailFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A976299EA48400FF8310 /* DetailFeature.swift */; };
+		1832A986299EA91A00FF8310 /* DetailFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A985299EA91A00FF8310 /* DetailFeatureTests.swift */; };
 		18DB9467299D6D1F00772713 /* StarsAndPlanetsClientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DB9466299D6D1F00772713 /* StarsAndPlanetsClientApp.swift */; };
 		18DB9469299D6D1F00772713 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DB9468299D6D1F00772713 /* ContentView.swift */; };
 		18DB946B299D6D2100772713 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18DB946A299D6D2100772713 /* Assets.xcassets */; };
@@ -19,9 +21,22 @@
 		18DB9485299E0E0C00772713 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DB9484299E0E0C00772713 /* Models.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		1832A980299EA90600FF8310 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 18DB945B299D6D1F00772713 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 18DB9462299D6D1F00772713;
+			remoteInfo = StarsAndPlanetsClient;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		1832A972299E1F6300FF8310 /* ListFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFeature.swift; sourceTree = "<group>"; };
 		1832A974299E214300FF8310 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
+		1832A976299EA48400FF8310 /* DetailFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailFeature.swift; sourceTree = "<group>"; };
+		1832A97C299EA90600FF8310 /* StarsAndPlanetsClientTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarsAndPlanetsClientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1832A985299EA91A00FF8310 /* DetailFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailFeatureTests.swift; sourceTree = "<group>"; };
 		18DB9463299D6D1F00772713 /* StarsAndPlanetsClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarsAndPlanetsClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18DB9466299D6D1F00772713 /* StarsAndPlanetsClientApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarsAndPlanetsClientApp.swift; sourceTree = "<group>"; };
 		18DB9468299D6D1F00772713 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -33,6 +48,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1832A979299EA90600FF8310 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18DB9460299D6D1F00772713 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,11 +68,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1832A97D299EA90600FF8310 /* StarsAndPlanetsClientTests */ = {
+			isa = PBXGroup;
+			children = (
+				1832A985299EA91A00FF8310 /* DetailFeatureTests.swift */,
+			);
+			path = StarsAndPlanetsClientTests;
+			sourceTree = "<group>";
+		};
 		18DB945A299D6D1F00772713 = {
 			isa = PBXGroup;
 			children = (
 				18DB947C299D744500772713 /* Packages */,
 				18DB9465299D6D1F00772713 /* StarsAndPlanetsClient */,
+				1832A97D299EA90600FF8310 /* StarsAndPlanetsClientTests */,
 				18DB9464299D6D1F00772713 /* Products */,
 				18DB947E299D748700772713 /* Frameworks */,
 			);
@@ -60,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				18DB9463299D6D1F00772713 /* StarsAndPlanetsClient.app */,
+				1832A97C299EA90600FF8310 /* StarsAndPlanetsClientTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -71,6 +103,7 @@
 				18DB9483299E0E0100772713 /* Models */,
 				18DB9468299D6D1F00772713 /* ContentView.swift */,
 				1832A972299E1F6300FF8310 /* ListFeature.swift */,
+				1832A976299EA48400FF8310 /* DetailFeature.swift */,
 				1832A974299E214300FF8310 /* Client.swift */,
 				18DB946A299D6D2100772713 /* Assets.xcassets */,
 				18DB946C299D6D2100772713 /* StarsAndPlanetsClient.entitlements */,
@@ -113,6 +146,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1832A97B299EA90600FF8310 /* StarsAndPlanetsClientTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1832A982299EA90600FF8310 /* Build configuration list for PBXNativeTarget "StarsAndPlanetsClientTests" */;
+			buildPhases = (
+				1832A978299EA90600FF8310 /* Sources */,
+				1832A979299EA90600FF8310 /* Frameworks */,
+				1832A97A299EA90600FF8310 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1832A981299EA90600FF8310 /* PBXTargetDependency */,
+			);
+			name = StarsAndPlanetsClientTests;
+			productName = StarsAndPlanetsClientTests;
+			productReference = 1832A97C299EA90600FF8310 /* StarsAndPlanetsClientTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		18DB9462299D6D1F00772713 /* StarsAndPlanetsClient */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 18DB9472299D6D2100772713 /* Build configuration list for PBXNativeTarget "StarsAndPlanetsClient" */;
@@ -145,6 +196,10 @@
 				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
+					1832A97B299EA90600FF8310 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = 18DB9462299D6D1F00772713;
+					};
 					18DB9462299D6D1F00772713 = {
 						CreatedOnToolsVersion = 14.2;
 					};
@@ -168,11 +223,19 @@
 			projectRoot = "";
 			targets = (
 				18DB9462299D6D1F00772713 /* StarsAndPlanetsClient */,
+				1832A97B299EA90600FF8310 /* StarsAndPlanetsClientTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1832A97A299EA90600FF8310 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18DB9461299D6D1F00772713 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -185,6 +248,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1832A978299EA90600FF8310 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1832A986299EA91A00FF8310 /* DetailFeatureTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18DB945F299D6D1F00772713 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -194,12 +265,60 @@
 				18DB9469299D6D1F00772713 /* ContentView.swift in Sources */,
 				1832A975299E214300FF8310 /* Client.swift in Sources */,
 				18DB9467299D6D1F00772713 /* StarsAndPlanetsClientApp.swift in Sources */,
+				1832A977299EA48400FF8310 /* DetailFeature.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		1832A981299EA90600FF8310 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 18DB9462299D6D1F00772713 /* StarsAndPlanetsClient */;
+			targetProxy = 1832A980299EA90600FF8310 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		1832A983299EA90600FF8310 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = net.tadel.StarsAndPlanetsClientTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StarsAndPlanetsClient.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/StarsAndPlanetsClient";
+			};
+			name = Debug;
+		};
+		1832A984299EA90600FF8310 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = net.tadel.StarsAndPlanetsClientTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StarsAndPlanetsClient.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/StarsAndPlanetsClient";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		18DB9470299D6D2100772713 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -384,6 +503,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1832A982299EA90600FF8310 /* Build configuration list for PBXNativeTarget "StarsAndPlanetsClientTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1832A983299EA90600FF8310 /* Debug */,
+				1832A984299EA90600FF8310 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		18DB945E299D6D1F00772713 /* Build configuration list for PBXProject "StarsAndPlanetsClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

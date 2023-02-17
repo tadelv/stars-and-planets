@@ -8,25 +8,36 @@
 import Apollo
 import Dependencies
 import Foundation
+import IdentifiedCollections
 import StarsAndPlanetsApollo
 
 struct Client {
   let fetchStars: () async throws -> [Star]
   let createStar: (String) async throws -> Bool // ?
+  var createPlanet: (Star, String) async throws -> Bool
 }
 
 extension Client: DependencyKey {
   static var previewValue: Client {
-    var stars: [Star] = [
+    var stars: IdentifiedArrayOf<Star> = [
       .init(id: "1", name: "Sun", planets: [.init(id: "11", name: "Earth")]),
       .init(id: "2", name: "Proxima Centauri", planets: [.init(id: "21", name: "Unknown")])
     ]
     return Self {
       try await Task.sleep(nanoseconds: NSEC_PER_SEC)
-      return stars
+      return Array(stars)
     } createStar: { name in
       try await Task.sleep(nanoseconds: NSEC_PER_SEC)
       stars.append(.init(id: String(Int.random(in: 0...1000)), name: name, planets: []))
+      return true
+    } createPlanet: { star, name in
+      try await Task.sleep(nanoseconds: NSEC_PER_SEC)
+      let copy = Star(id: star.id,
+                      name: star.name,
+                      planets: star.planets + [
+                        .init(id: String(Int.random(in: 0...1000)), name: name)
+                      ])
+      stars[id: star.id] = copy
       return true
     }
   }
@@ -52,10 +63,23 @@ extension Client: DependencyKey {
     } createStar: { name in
       try await withCheckedThrowingContinuation { continuation in
         apolloClient.perform(mutation: NewStarMutation(name: name)) { result in
-          continuation.resume(with:
-            result.map { _ in
-              true
-            }
+          continuation.resume(
+            with:
+              result.map { _ in
+                true
+              }
+          )
+        }
+      }
+    } createPlanet: { star, name in
+      try await withCheckedThrowingContinuation { continuation in
+        apolloClient.perform(mutation: NewPlanetMutation(name: name,
+                                                         starID: UUID(stringLiteral: star.id))) { result in
+          continuation.resume(
+            with:
+              result.map { _ in
+                true
+              }
           )
         }
       }

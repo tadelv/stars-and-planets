@@ -10,11 +10,22 @@ import SwiftUI
 
 @main
 struct StarsAndPlanetsClientApp: App {
-    var body: some Scene {
-        WindowGroup {
-//          ContentView()
-          ListView(store: Store(initialState: ListFeature.State(),
-                                reducer: ListFeature()))
-        }
+  var isUnitTesting: Bool {
+    if NSClassFromString("XCTestCase") != nil {
+      return true
     }
+    return false
+//    return ProcessInfo.processInfo.environment["UNITTEST"] == "1"
+  }
+
+  var body: some Scene {
+    WindowGroup {
+      if isUnitTesting {
+        EmptyView()
+      } else {
+        ListView(store: Store(initialState: ListFeature.State(),
+                              reducer: ListFeature()))
+      }
+    }
+  }
 }
