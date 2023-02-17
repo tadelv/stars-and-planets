@@ -12,7 +12,7 @@ struct ListFeature: Reducer {
   struct State: Equatable {
     var stars: [Star] = []
     var errorMessage: String?
-    var selectedStar: Star?
+    var selectedStar: DetailFeature.State?
   }
 
   enum Action {
@@ -23,54 +23,70 @@ struct ListFeature: Reducer {
     case okTapped
     case starSelected(Star)
     case navigateBack
+    case detail(DetailFeature.Action)
   }
 
   @Dependency(\.client) var client
 
-  func reduce(into state: inout State, action: Action) -> Effect<Action> {
-    switch action {
-    case .load:
-      return .task {
-        await .resultsFetched(.init(catching: {
-          try await client.fetchStars()
-        }))
-      }.animation()
-    case let .resultsFetched(result):
-      switch result {
-      case let .success(stars):
-        state.errorMessage = nil
-        state.stars = stars
-      case let .failure(error):
-        state.errorMessage = "Failed with: \(error.localizedDescription)"
-      }
-      return .none
-    case let .newStar(name):
-      return .task {
-        await .starCreated(.init(catching: {
-          _ = try await client.createStar(name)
-        }))
-      }
-    case let .starCreated(result):
-      switch result {
-      case .success:
+  var body: some ReducerProtocol<State, Action> {
+    Reduce { state, action in
+      switch action {
+      case .load:
         return .task {
-          .load
+          await .resultsFetched(.init(catching: {
+            try await client.fetchStars()
+          }))
+        }.animation()
+      case let .resultsFetched(result):
+        switch result {
+        case let .success(stars):
+          state.errorMessage = nil
+          state.stars = stars
+        case let .failure(error):
+          state.errorMessage = "Failed with: \(error.localizedDescription)"
         }
-      case let .failure(error):
-        state.errorMessage = "Failed with: \(error.localizedDescription)"
+        return .none
+      case let .newStar(name):
+        return .task {
+          await .starCreated(.init(catching: {
+            _ = try await client.createStar(name)
+          }))
+        }
+      case let .starCreated(result):
+        switch result {
+        case .success:
+          return .task {
+            .load
+          }
+        case let .failure(error):
+          state.errorMessage = "Failed with: \(error.localizedDescription)"
+          return .none
+        }
+      case .okTapped:
+        state.errorMessage = nil
+        return .none
+      case let .starSelected(star):
+        state.selectedStar = DetailFeature.State(star: star)
+        return .none
+      case .navigateBack:
+        state.selectedStar = nil
+        return .none
+      case .detail(.delegate(.planetAdded)):
+        return .send(.load)
+      case .detail:
         return .none
       }
-    case .okTapped:
-      state.errorMessage = nil
-      return .none
-    case let .starSelected(star):
-      state.selectedStar = star
-      return .none
-    case .navigateBack:
-      state.selectedStar = nil
-      return .none
+    }
+    .ifLet(\.selectedStar, action: /Action.detail) {
+      Scope(state: \.self, action: /.self) {
+        DetailFeature()
+      }
     }
   }
+//
+//  func reduce(into state: inout State, action: Action) -> Effect<Action> {
+//
+//  }
 }
 
 struct ListView: View {
@@ -103,10 +119,8 @@ struct ListView: View {
               isPresented: viewStore.binding(get: { $0.selectedStar != nil },
                                              send: .navigateBack)
             ) {
-
-              if let star = viewStore.selectedStar {
-                DetailView(store: Store(initialState: DetailFeature.State(star: star),
-                                        reducer: DetailFeature()))
+              IfLetStore(store.scope(state: \.selectedStar, action: ListFeature.Action.detail)) {
+                DetailView(store: $0)
               }
             }
           }
