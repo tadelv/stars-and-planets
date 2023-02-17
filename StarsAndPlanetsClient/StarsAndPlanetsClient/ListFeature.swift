@@ -42,6 +42,10 @@ struct ListFeature: Reducer {
         case let .success(stars):
           state.errorMessage = nil
           state.stars = stars
+          if let selected = state.selectedStar?.star,
+             let found = stars.first(where: { $0.id == selected.id }) {
+            state.selectedStar = .init(star: found)
+          }
         case let .failure(error):
           state.errorMessage = "Failed with: \(error.localizedDescription)"
         }
@@ -83,10 +87,6 @@ struct ListFeature: Reducer {
       }
     }
   }
-//
-//  func reduce(into state: inout State, action: Action) -> Effect<Action> {
-//
-//  }
 }
 
 struct ListView: View {
