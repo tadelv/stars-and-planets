@@ -19,6 +19,7 @@ type Planet {
 type Query {
   planets: [Planet!]!
   stars: [Star!]!
+  starsPlanets(starID: UUID!): [Planet!]!
 }
 
 type Star {

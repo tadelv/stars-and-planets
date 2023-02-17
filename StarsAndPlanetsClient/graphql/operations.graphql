@@ -9,6 +9,13 @@ query Stars {
   }
 }
 
+query PlanetsOfAStar($starID: UUID!) {
+  starsPlanets(starID: $starID) {
+    id
+    name
+  }
+}
+
 mutation NewStar($name: String!) {
   createStar(name: $name) {
     id

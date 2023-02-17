@@ -13,11 +13,19 @@ import StarsAndPlanetsApollo
 
 struct Client {
   let fetchStars: () async throws -> [Star]
+  var starsPlanets: (Star) async throws -> [Planet]
   let createStar: (String) async throws -> Bool // ?
   var createPlanet: (Star, String) async throws -> Bool
 }
 
 extension Client: DependencyKey {
+  static var testValue: Client {
+    Self(fetchStars: unimplemented(),
+         starsPlanets: unimplemented(),
+         createStar: unimplemented(),
+         createPlanet: unimplemented())
+  }
+
   static var previewValue: Client {
     var stars: IdentifiedArrayOf<Star> = [
       .init(id: "1", name: "Sun", planets: [.init(id: "11", name: "Earth")]),
@@ -26,6 +34,12 @@ extension Client: DependencyKey {
     return Self {
       try await Task.sleep(nanoseconds: NSEC_PER_SEC)
       return Array(stars)
+    } starsPlanets: { star in
+      guard let parentStar = stars[id: star.id] else {
+        struct NotFound: Error {}
+        throw NotFound()
+      }
+      return parentStar.planets
     } createStar: { name in
       try await Task.sleep(nanoseconds: NSEC_PER_SEC)
       stars.append(.init(id: String(Int.random(in: 0...1000)), name: name, planets: []))
@@ -59,6 +73,10 @@ extension Client: DependencyKey {
             }
           })
         }
+      }
+    } starsPlanets: { star in
+      try await withCheckedThrowingContinuation { continuation in
+        apolloClient.fetch(query: PlanetsOfAStarQuery(starID: star.id))
       }
     } createStar: { name in
       try await withCheckedThrowingContinuation { continuation in
