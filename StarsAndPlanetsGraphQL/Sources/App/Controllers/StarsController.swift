@@ -1,3 +1,4 @@
+import Fluent
 import Vapor
 import GraphQLKit
 
@@ -43,6 +44,20 @@ final class StarsController {
   func fetchPlanets(request: Request, _: NoArguments, group: EventLoopGroup) throws -> EventLoopFuture<[Planet]> {
     group.next().makeFutureWithTask {
       try await Planet.query(on: request.db).all()
+    }
+  }
+
+  struct PlanetsForStarArguments: Codable {
+    let starID: UUID
+  }
+
+  func fetchStarsPlanets(request: Request,
+                         arguments: PlanetsForStarArguments,
+                         group: EventLoopGroup) throws -> EventLoopFuture<[Planet]> {
+    group.next().makeFutureWithTask {
+      return try await Planet.query(on: request.db)
+        .filter(\.$star.$id == arguments.starID)
+        .all()
     }
   }
 

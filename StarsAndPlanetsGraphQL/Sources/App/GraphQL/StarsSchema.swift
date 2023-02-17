@@ -19,6 +19,9 @@ let starsSchema = try! Schema<StarsController, Request> {
   Query {
     Field("stars", at: StarsController.fetchStars)
     Field("planets", at: StarsController.fetchPlanets)
+    Field("starsPlanets", at: StarsController.fetchStarsPlanets) {
+      Argument("starID", at: \.starID)
+    }
   }
 
   Mutation {
