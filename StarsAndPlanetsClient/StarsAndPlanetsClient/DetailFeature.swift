@@ -16,10 +16,12 @@ struct DetailFeature: Reducer {
   enum Action: Equatable {
     case addPlanet(String)
     case planetAdded(TaskResult<Bool>)
+    case loadPlanets
+    case planetsFetched(TaskResult<[Planet]>)
     case delegate(Delegate)
 
     enum Delegate: Equatable {
-      case planetAdded
+      case planetAdded(Star)
     }
   }
 
@@ -39,9 +41,24 @@ struct DetailFeature: Reducer {
         // TODO: show error
         return .none
       case .success:
-        return .send(.delegate(.planetAdded))
+        return .send(.loadPlanets)
       }
     case .delegate:
+      return .none
+    case .loadPlanets:
+      return .task { [star = state.star] in
+        await .planetsFetched(.init(catching: {
+          try await client.starsPlanets(star)
+        }))
+      }
+    case let .planetsFetched(result):
+      switch result {
+      case let .success(planets):
+        state.star.planets = planets
+        return .send(.delegate(.planetAdded(state.star)))
+      case let .failure(error):
+        break
+      }
       return .none
     }
   }

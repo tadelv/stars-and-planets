@@ -76,7 +76,16 @@ extension Client: DependencyKey {
       }
     } starsPlanets: { star in
       try await withCheckedThrowingContinuation { continuation in
-        apolloClient.fetch(query: PlanetsOfAStarQuery(starID: star.id))
+        apolloClient.fetch(query: PlanetsOfAStarQuery(starID: star.id)) { result in
+          continuation.resume(with: result.map { data in
+            guard let innerData = data.data else {
+              return []
+            }
+            return innerData.starsPlanets.map {
+              Planet(id: $0.id!, name: $0.name)
+            }
+          })
+        }
       }
     } createStar: { name in
       try await withCheckedThrowingContinuation { continuation in

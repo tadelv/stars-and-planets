@@ -10,7 +10,7 @@ import Foundation
 struct Star: Identifiable, Equatable {
   let id: String
   let name: String
-  let planets: [Planet]
+  var planets: [Planet]
 }
 
 struct Planet: Identifiable, Equatable {
