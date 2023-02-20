@@ -75,8 +75,15 @@ struct ListFeature: Reducer {
       case .navigateBack:
         state.selectedStar = nil
         return .none
-      case .detail(.delegate(.planetAdded)):
-        return .send(.load)
+      case let .detail(.delegate(.planetAdded(star))):
+//        state.stars[id: star.id] = star
+        guard let index = state.stars.firstIndex(where: {
+          $0.id == star.id
+        }) else {
+          return .none
+        }
+        state.stars[index] = star
+        return .none
       case .detail:
         return .none
       }

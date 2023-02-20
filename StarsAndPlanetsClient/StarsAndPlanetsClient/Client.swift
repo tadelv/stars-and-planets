@@ -58,6 +58,7 @@ extension Client: DependencyKey {
 
   static var liveValue: Client {
     let apolloClient = ApolloClient(url: URL(string: "http://localhost:8080/graphql")!)
+
     return Self {
       try await withCheckedThrowingContinuation { continuation in
         apolloClient.fetch(query: StarsQuery(), cachePolicy: .fetchIgnoringCacheData) { result in
@@ -76,7 +77,8 @@ extension Client: DependencyKey {
       }
     } starsPlanets: { star in
       try await withCheckedThrowingContinuation { continuation in
-        apolloClient.fetch(query: PlanetsOfAStarQuery(starID: star.id)) { result in
+        apolloClient.fetch(query: PlanetsOfAStarQuery(starID: star.id),
+                           cachePolicy: .fetchIgnoringCacheData) { result in
           continuation.resume(with: result.map { data in
             guard let innerData = data.data else {
               return []
