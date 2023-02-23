@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ListFeature: Reducer {
   struct State: Equatable {
-    var stars: [Star] = []
+    var stars: IdentifiedArrayOf<Star> = []
     var errorMessage: String?
     var selectedStar: DetailFeature.State?
   }
@@ -41,10 +41,10 @@ struct ListFeature: Reducer {
         switch result {
         case let .success(stars):
           state.errorMessage = nil
-          state.stars = stars
+          state.stars = IdentifiedArray(uniqueElements: stars)
           if let selected = state.selectedStar?.star,
-             let found = stars.first(where: { $0.id == selected.id }) {
-            state.selectedStar = .init(star: found)
+             let found = state.stars[id: selected.id] {
+            state.selectedStar = DetailFeature.State(star: found)
           }
         case let .failure(error):
           state.errorMessage = "Failed with: \(error.localizedDescription)"
@@ -75,16 +75,15 @@ struct ListFeature: Reducer {
       case .navigateBack:
         state.selectedStar = nil
         return .none
-      case .detail(.delegate(.planetAdded)):
-        return .send(.load)
+      case let .detail(.delegate(.planetAdded(star))):
+        state.stars[id: star.id] = star
+        return .none
       case .detail:
         return .none
       }
     }
     .ifLet(\.selectedStar, action: /Action.detail) {
-      Scope(state: \.self, action: /.self) {
-        DetailFeature()
-      }
+      DetailFeature()
     }
   }
 }

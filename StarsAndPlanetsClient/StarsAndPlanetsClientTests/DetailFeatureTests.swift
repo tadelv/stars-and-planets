@@ -21,17 +21,28 @@ final class DetailFeatureTests: XCTestCase {
     }
 
   func testAddingPlanetSucceeds() async throws {
-    let star = Star(id: "1", name: "A", planets: [])
+    var star = Star(id: "1", name: "A", planets: [])
     let store = TestStore(initialState: DetailFeature.State(star: star),
                           reducer: DetailFeature())
-    store.dependencies.client = Client(fetchStars: unimplemented(),
-                                       createStar: unimplemented(), createPlanet: { _, _ in
+    store.dependencies.client.createPlanet = { _, _ in
       true
-    })
+    }
+
+    let planets: [Planet] = [.init(id: "1", name: "a"),
+                             .init(id: "2", name: "b")]
+    store.dependencies.client.starsPlanets = { _ in
+      planets
+    }
 
     await store.send(.addPlanet("test"))
     await store.receive(.planetAdded(.success(true)))
-    await store.receive(.delegate(.planetAdded))
+    await store.receive(.loadPlanets)
+    await store.receive(.planetsFetched(.success(planets))) {
+      $0.star.planets = planets
+    }
+
+    star.planets = planets
+    await store.receive(.delegate(.planetAdded(star)))
   }
 
   func testAddingPlanetFails() async throws {
@@ -41,8 +52,7 @@ final class DetailFeatureTests: XCTestCase {
 
     struct TestError: Error, Equatable {}
 
-    store.dependencies.client = Client(fetchStars: unimplemented(),
-                                       createStar: unimplemented()) { _, _ in
+    store.dependencies.client.createPlanet = { _, _ in
       throw TestError()
     }
 
