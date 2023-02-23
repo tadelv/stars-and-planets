@@ -60,58 +60,24 @@ extension Client: DependencyKey {
     let apolloClient = ApolloClient(url: URL(string: "http://localhost:8080/graphql")!)
 
     return Self {
-      try await withCheckedThrowingContinuation { continuation in
-        apolloClient.fetch(query: StarsQuery(), cachePolicy: .fetchIgnoringCacheData) { result in
-          continuation.resume(with: result.map { data in
-            guard let innerData = data.data else {
-              print(data.errors!.first!)
-              return []
-            }
-            return innerData.stars.map { star in
-              Star(id: star.id!,
-                   name: star.name,
-                   planets: star.planets.map { .init(id: $0.id!, name: $0.name) })
-            }
-          })
-        }
+      let response = try await apolloClient.fetchAsync(query: StarsQuery())
+      return response.stars.map { star in
+        Star(id: star.id!,
+             name: star.name,
+             planets: star.planets.map { .init(id: $0.id!, name: $0.name) })
+
       }
     } starsPlanets: { star in
-      try await withCheckedThrowingContinuation { continuation in
-        apolloClient.fetch(query: PlanetsOfAStarQuery(starID: star.id),
-                           cachePolicy: .fetchIgnoringCacheData) { result in
-          continuation.resume(with: result.map { data in
-            guard let innerData = data.data else {
-              return []
-            }
-            return innerData.starsPlanets.map {
-              Planet(id: $0.id!, name: $0.name)
-            }
-          })
-        }
+      let response = try await apolloClient.fetchAsync(query: PlanetsOfAStarQuery(starID: star.id))
+      return response.starsPlanets.map {
+        Planet(id: $0.id!, name: $0.name)
       }
     } createStar: { name in
-      try await withCheckedThrowingContinuation { continuation in
-        apolloClient.perform(mutation: NewStarMutation(name: name)) { result in
-          continuation.resume(
-            with:
-              result.map { _ in
-                true
-              }
-          )
-        }
-      }
+      _ = try await apolloClient.performAsync(mutation: NewStarMutation(name: name))
+      return true
     } createPlanet: { star, name in
-      try await withCheckedThrowingContinuation { continuation in
-        apolloClient.perform(mutation: NewPlanetMutation(name: name,
-                                                         starID: UUID(stringLiteral: star.id))) { result in
-          continuation.resume(
-            with:
-              result.map { _ in
-                true
-              }
-          )
-        }
-      }
+      _ = try await apolloClient.performAsync(mutation: NewPlanetMutation(name: name, starID: star.id))
+      return true
     }
   }
 }
@@ -123,3 +89,42 @@ extension DependencyValues {
   }
 }
 
+extension ApolloClient {
+  struct NoData: Error {}
+
+  func fetchAsync<Query: GraphQLQuery>(query: Query, cachePolicy: CachePolicy = .fetchIgnoringCacheData) async throws -> Query.Data {
+    try await withCheckedThrowingContinuation { continuation in
+      self.fetch(query: query, cachePolicy: cachePolicy) { result in
+        continuation.resume(
+          with: result.flatMap {
+            if let error = $0.errors?.first {
+              return .failure(error)
+            }
+            guard let data = $0.data else {
+              return .failure(NoData())
+            }
+            return .success(data)
+          }
+        )
+      }
+    }
+  }
+
+  func performAsync<Mutation: GraphQLMutation>(mutation: Mutation) async throws -> Mutation.Data {
+    try await withCheckedThrowingContinuation { continuation in
+      self.perform(mutation: mutation) { result in
+        continuation.resume(
+          with: result.flatMap {
+            if let error = $0.errors?.first {
+              return .failure(error)
+            }
+            guard let data = $0.data else {
+              return .failure(NoData())
+            }
+            return .success(data)
+          }
+        )
+      }
+    }
+  }
+}

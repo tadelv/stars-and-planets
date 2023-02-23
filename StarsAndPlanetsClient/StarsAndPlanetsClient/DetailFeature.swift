@@ -50,7 +50,7 @@ struct DetailFeature: Reducer {
         await .planetsFetched(.init(catching: {
           try await client.starsPlanets(star)
         }))
-      }
+      }.animation()
     case let .planetsFetched(result):
       switch result {
       case let .success(planets):

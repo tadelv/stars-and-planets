@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/fluent-kit.git",
       "state" : {
-        "revision" : "10f32130a0f7e29de8def48edf69564c36cf3b74",
-        "version" : "1.38.0"
+        "revision" : "cc8fed9ed71dd61872b951df707ce5ac122d7365",
+        "version" : "1.39.0"
       }
     },
     {
@@ -212,8 +212,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-case-paths",
       "state" : {
-        "revision" : "c3a42e8d1a76ff557cf565ed6d8b0aee0e6e75af",
-        "version" : "0.11.0"
+        "revision" : "3c4eea896f8ee9cbe1c11d1d3d46b0f2809da958",
+        "version" : "0.12.0"
       }
     },
     {
@@ -240,7 +240,7 @@
       "location" : "https://github.com/pointfreeco/swift-composable-architecture.git",
       "state" : {
         "branch" : "prerelease/1.0",
-        "revision" : "cbe479695fb7904ca4278658761d2250c0360d02"
+        "revision" : "ceca49f63abdc0ccf08b50ba561c5642fde6cc90"
       }
     },
     {
