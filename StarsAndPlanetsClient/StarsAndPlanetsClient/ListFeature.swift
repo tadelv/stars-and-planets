@@ -15,12 +15,17 @@ struct ListFeature: ReducerProtocol {
     var selectedStar: DetailFeature.State?
     @PresentationState
     var alert: AlertState<Action.Alert>?
+    @PresentationState
+    var newStar: CreateStarFeature.State?
   }
 
   enum Action {
     case load
     case resultsFetched(TaskResult<[Star]>)
-    case newStar(String)
+    case createStarTapped
+    case dismissCreateStarTapped
+    case newStar(PresentationAction<CreateStarFeature.Action>)
+    case createStarConfirmTapped
     case starCreated(TaskResult<Void>)
     case starSelected(Star)
     case navigateBack
@@ -56,12 +61,28 @@ struct ListFeature: ReducerProtocol {
           state.alert = .failed(with: error)
         }
         return .none
-      case let .newStar(name):
-        return .task {
-          await .starCreated(.init(catching: {
-            _ = try await client.createStar(name)
-          }))
+      case .createStarTapped:
+        state.newStar = .init(name: "")
+        return .none
+
+      case .dismissCreateStarTapped:
+        return .send(.newStar(.dismiss))
+
+      case .createStarConfirmTapped:
+        guard let name = state.newStar?.name,
+              name.isEmpty == false else {
+          return .none
         }
+        return .merge(
+          .send(.newStar(.dismiss)),
+          .task {
+            await .starCreated(.init(catching: {
+              _ = try await client.createStar(name)
+            }))
+          }
+        )
+      case .newStar:
+        return .none
       case let .starCreated(result):
         switch result {
         case .success:
@@ -86,9 +107,9 @@ struct ListFeature: ReducerProtocol {
       }
     }
     .ifLet(\.$alert, action: /Action.alert)
-//    .ifLet(state: \.alert, action: /Action.alert) {
-//
-//    }
+    .ifLet(\.$newStar, action: /Action.newStar) {
+      CreateStarFeature()
+    }
     .ifLet(\.selectedStar, action: /Action.detail) {
       DetailFeature()
     }
@@ -108,14 +129,12 @@ extension AlertState where Action == ListFeature.Action.Alert {
 struct ListView: View {
   let store: StoreOf<ListFeature>
 
-  @State var isShowingSheet = false
-
   var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       NavigationStack {
         List {
           Button {
-            isShowingSheet = true
+            viewStore.send(.createStarTapped)
           } label: {
             HStack {
               Image(systemName: "plus")
@@ -148,10 +167,27 @@ struct ListView: View {
       .onAppear {
         viewStore.send(.load)
       }
-      .sheet(isPresented: $isShowingSheet) {
-        AddStarView { name in
-          viewStore.send(.newStar(name))
-          isShowingSheet = false
+      .sheet(
+        store: self.store.scope(
+          state: \.$newStar,
+          action: ListFeature.Action.newStar
+        )
+      ) { store in
+        NavigationView {
+          CreateStarView(store: store)
+            .toolbar {
+              ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                  viewStore.send(.dismissCreateStarTapped)
+                }
+              }
+              ToolbarItem(placement: .primaryAction) {
+                Button("Add") {
+                  viewStore.send(.createStarConfirmTapped)
+                }
+              }
+            }
+            .navigationTitle("New Star")
         }
       }
       .alert(
@@ -164,34 +200,13 @@ struct ListView: View {
   }
 }
 
-struct AddStarView: View {
-  @State var name = ""
-
-  let action: (String) -> Void
-
-  @FocusState
-  var focused
-
-  var body: some View {
-    Form {
-      Section("Star name") {
-        TextField("Enter name", text: $name)
-          .focused($focused)
-          .onAppear {
-            focused = true
-          }
-        Button {
-          action(name)
-        } label: {
-          Text("Done")
-        }
-      }
-    }
-  }
-}
-
 struct ListView_Previews: PreviewProvider {
   static var previews: some View {
-    ListView(store: Store(initialState: ListFeature.State(), reducer: ListFeature()))
+    ListView(
+      store: Store(
+        initialState: ListFeature.State(),
+        reducer: ListFeature()
+      )
+    )
   }
 }

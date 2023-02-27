@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		18222B9C29AD37FC00549527 /* CreateStarFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18222B9B29AD37FC00549527 /* CreateStarFeature.swift */; };
 		1832A971299E187100FF8310 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 1832A970299E187100FF8310 /* ComposableArchitecture */; };
 		1832A973299E1F6300FF8310 /* ListFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A972299E1F6300FF8310 /* ListFeature.swift */; };
 		1832A975299E214300FF8310 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A974299E214300FF8310 /* Client.swift */; };
@@ -32,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		18222B9B29AD37FC00549527 /* CreateStarFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateStarFeature.swift; sourceTree = "<group>"; };
 		1832A972299E1F6300FF8310 /* ListFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFeature.swift; sourceTree = "<group>"; };
 		1832A974299E214300FF8310 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
 		1832A976299EA48400FF8310 /* DetailFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailFeature.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				18DB9466299D6D1F00772713 /* StarsAndPlanetsClientApp.swift */,
 				18DB9483299E0E0100772713 /* Models */,
 				1832A972299E1F6300FF8310 /* ListFeature.swift */,
+				18222B9B29AD37FC00549527 /* CreateStarFeature.swift */,
 				1832A976299EA48400FF8310 /* DetailFeature.swift */,
 				1832A974299E214300FF8310 /* Client.swift */,
 				18DB946A299D6D2100772713 /* Assets.xcassets */,
@@ -263,6 +266,7 @@
 			files = (
 				1832A973299E1F6300FF8310 /* ListFeature.swift in Sources */,
 				18DB9485299E0E0C00772713 /* Models.swift in Sources */,
+				18222B9C29AD37FC00549527 /* CreateStarFeature.swift in Sources */,
 				1832A975299E214300FF8310 /* Client.swift in Sources */,
 				18DB9467299D6D1F00772713 /* StarsAndPlanetsClientApp.swift in Sources */,
 				1832A977299EA48400FF8310 /* DetailFeature.swift in Sources */,
