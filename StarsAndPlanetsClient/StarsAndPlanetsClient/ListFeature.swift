@@ -8,10 +8,12 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct ListFeature: Reducer {
+struct ListFeature: ReducerProtocol {
+
   struct State: Equatable {
     var stars: IdentifiedArrayOf<Star> = []
     var selectedStar: DetailFeature.State?
+    @PresentationState
     var alert: AlertState<Action.Alert>?
   }
 
@@ -23,7 +25,7 @@ struct ListFeature: Reducer {
     case starSelected(Star)
     case navigateBack
     case detail(DetailFeature.Action)
-    case alert(AlertAction<Alert>)
+    case alert(PresentationAction<Alert>)
 
     enum Alert: Equatable {
     }
@@ -32,7 +34,7 @@ struct ListFeature: Reducer {
   @Dependency(\.client) var client
 
   var body: some ReducerProtocol<State, Action> {
-    Reduce { state, action in
+    Reduce<State, Action> { state, action in
       switch action {
       case .alert:
         return .none
@@ -83,7 +85,10 @@ struct ListFeature: Reducer {
         return .none
       }
     }
-    .alert(state: \.alert, action: /Action.alert)
+    .ifLet(\.$alert, action: /Action.alert)
+//    .ifLet(state: \.alert, action: /Action.alert) {
+//
+//    }
     .ifLet(\.selectedStar, action: /Action.detail) {
       DetailFeature()
     }
@@ -149,7 +154,12 @@ struct ListView: View {
           isShowingSheet = false
         }
       }
-      .alert(store: self.store.scope(state: \.alert, action: ListFeature.Action.alert))
+      .alert(
+        store: self.store.scope(
+          state: \.$alert,
+          action: ListFeature.Action.alert
+        )
+      )
     }
   }
 }

@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct DetailFeature: Reducer {
+struct DetailFeature: ReducerProtocol {
   struct State: Equatable {
     var star: Star
   }
@@ -27,7 +27,7 @@ struct DetailFeature: Reducer {
 
   @Dependency(\.client) var client
 
-  func reduce(into state: inout State, action: Action) -> Effect<Action> {
+  func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
     switch action {
     case let .addPlanet(name):
       return .task { [star = state.star] in
