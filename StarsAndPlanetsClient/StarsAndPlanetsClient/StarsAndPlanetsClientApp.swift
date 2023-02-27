@@ -15,7 +15,6 @@ struct StarsAndPlanetsClientApp: App {
       return true
     }
     return false
-//    return ProcessInfo.processInfo.environment["UNITTEST"] == "1"
   }
 
   var body: some Scene {
@@ -23,8 +22,12 @@ struct StarsAndPlanetsClientApp: App {
       if isUnitTesting {
         EmptyView()
       } else {
-        ListView(store: Store(initialState: ListFeature.State(),
-                              reducer: ListFeature()))
+        ListView(
+          store: Store(
+            initialState: ListFeature.State(),
+            reducer: ListFeature()._printChanges()
+          )
+        )
       }
     }
   }

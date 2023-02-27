@@ -15,7 +15,6 @@
 		18C9DA3029ACD1AA00FD1B28 /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C9DA2F29ACD1AA00FD1B28 /* Navigation.swift */; };
 		18C9DA3329ACD29C00FD1B28 /* SwiftUINavigation in Frameworks */ = {isa = PBXBuildFile; productRef = 18C9DA3229ACD29C00FD1B28 /* SwiftUINavigation */; };
 		18DB9467299D6D1F00772713 /* StarsAndPlanetsClientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DB9466299D6D1F00772713 /* StarsAndPlanetsClientApp.swift */; };
-		18DB9469299D6D1F00772713 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DB9468299D6D1F00772713 /* ContentView.swift */; };
 		18DB946B299D6D2100772713 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18DB946A299D6D2100772713 /* Assets.xcassets */; };
 		18DB946F299D6D2100772713 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18DB946E299D6D2100772713 /* Preview Assets.xcassets */; };
 		18DB9477299D6E0E00772713 /* Apollo in Frameworks */ = {isa = PBXBuildFile; productRef = 18DB9476299D6E0E00772713 /* Apollo */; };
@@ -42,7 +41,6 @@
 		18C9DA2F29ACD1AA00FD1B28 /* Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		18DB9463299D6D1F00772713 /* StarsAndPlanetsClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarsAndPlanetsClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18DB9466299D6D1F00772713 /* StarsAndPlanetsClientApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarsAndPlanetsClientApp.swift; sourceTree = "<group>"; };
-		18DB9468299D6D1F00772713 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		18DB946A299D6D2100772713 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		18DB946C299D6D2100772713 /* StarsAndPlanetsClient.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StarsAndPlanetsClient.entitlements; sourceTree = "<group>"; };
 		18DB946E299D6D2100772713 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -105,7 +103,6 @@
 			children = (
 				18DB9466299D6D1F00772713 /* StarsAndPlanetsClientApp.swift */,
 				18DB9483299E0E0100772713 /* Models */,
-				18DB9468299D6D1F00772713 /* ContentView.swift */,
 				1832A972299E1F6300FF8310 /* ListFeature.swift */,
 				18C9DA2F29ACD1AA00FD1B28 /* Navigation.swift */,
 				1832A976299EA48400FF8310 /* DetailFeature.swift */,
@@ -270,7 +267,6 @@
 				1832A973299E1F6300FF8310 /* ListFeature.swift in Sources */,
 				18DB9485299E0E0C00772713 /* Models.swift in Sources */,
 				18C9DA3029ACD1AA00FD1B28 /* Navigation.swift in Sources */,
-				18DB9469299D6D1F00772713 /* ContentView.swift in Sources */,
 				1832A975299E214300FF8310 /* Client.swift in Sources */,
 				18DB9467299D6D1F00772713 /* StarsAndPlanetsClientApp.swift in Sources */,
 				1832A977299EA48400FF8310 /* DetailFeature.swift in Sources */,
