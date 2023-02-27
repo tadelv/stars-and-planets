@@ -11,8 +11,8 @@ import SwiftUI
 struct ListFeature: Reducer {
   struct State: Equatable {
     var stars: IdentifiedArrayOf<Star> = []
-    var errorMessage: String?
     var selectedStar: DetailFeature.State?
+    var alert: AlertState<Action.Alert>?
   }
 
   enum Action {
@@ -20,10 +20,13 @@ struct ListFeature: Reducer {
     case resultsFetched(TaskResult<[Star]>)
     case newStar(String)
     case starCreated(TaskResult<Void>)
-    case okTapped
     case starSelected(Star)
     case navigateBack
     case detail(DetailFeature.Action)
+    case alert(AlertAction<Alert>)
+
+    enum Alert: Equatable {
+    }
   }
 
   @Dependency(\.client) var client
@@ -31,6 +34,8 @@ struct ListFeature: Reducer {
   var body: some ReducerProtocol<State, Action> {
     Reduce { state, action in
       switch action {
+      case .alert:
+        return .none
       case .load:
         return .task {
           await .resultsFetched(.init(catching: {
@@ -40,14 +45,13 @@ struct ListFeature: Reducer {
       case let .resultsFetched(result):
         switch result {
         case let .success(stars):
-          state.errorMessage = nil
           state.stars = IdentifiedArray(uniqueElements: stars)
           if let selected = state.selectedStar?.star,
              let found = state.stars[id: selected.id] {
             state.selectedStar = DetailFeature.State(star: found)
           }
         case let .failure(error):
-          state.errorMessage = "Failed with: \(error.localizedDescription)"
+          state.alert = .failed(with: error)
         }
         return .none
       case let .newStar(name):
@@ -63,12 +67,9 @@ struct ListFeature: Reducer {
             .load
           }
         case let .failure(error):
-          state.errorMessage = "Failed with: \(error.localizedDescription)"
+          state.alert = .failed(with: error)
           return .none
         }
-      case .okTapped:
-        state.errorMessage = nil
-        return .none
       case let .starSelected(star):
         state.selectedStar = DetailFeature.State(star: star)
         return .none
@@ -82,8 +83,19 @@ struct ListFeature: Reducer {
         return .none
       }
     }
+    .alert(state: \.alert, action: /Action.alert)
     .ifLet(\.selectedStar, action: /Action.detail) {
       DetailFeature()
+    }
+  }
+}
+
+extension AlertState where Action == ListFeature.Action.Alert {
+  static func failed(with error: Error) -> Self {
+    AlertState {
+      TextState("Something went wrong")
+    } message: {
+      TextState("Failed with: \(error.localizedDescription)")
     }
   }
 }
@@ -118,7 +130,10 @@ struct ListView: View {
               isPresented: viewStore.binding(get: { $0.selectedStar != nil },
                                              send: .navigateBack)
             ) {
-              IfLetStore(store.scope(state: \.selectedStar, action: ListFeature.Action.detail)) {
+              IfLetStore(store.scope(
+                state: \.selectedStar,
+                action: ListFeature.Action.detail
+              )) {
                 DetailView(store: $0)
               }
             }
@@ -134,13 +149,7 @@ struct ListView: View {
           isShowingSheet = false
         }
       }
-      .alert("Something went wrong",
-             isPresented: viewStore.binding(get: {
-        $0.errorMessage != nil
-      }, send: .okTapped),
-             actions: { EmptyView() }) {
-        Text(viewStore.errorMessage ?? "")
-      }
+      .alert(store: self.store.scope(state: \.alert, action: ListFeature.Action.alert))
     }
   }
 }
