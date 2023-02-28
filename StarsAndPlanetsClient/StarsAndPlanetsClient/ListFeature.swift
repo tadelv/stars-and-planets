@@ -14,8 +14,6 @@ struct ListFeature: ReducerProtocol {
     var stars: IdentifiedArrayOf<Star> = []
     @PresentationState
     var selectedStar: DetailFeature.State?
-    @PresentationState
-    var newStarSheet: CreateStarFeature.State?
 
     @PresentationState
     var destination: Destination?
@@ -29,9 +27,8 @@ struct ListFeature: ReducerProtocol {
 
   enum Action {
     case load
-    case starssFetched(TaskResult<[Star]>)
+    case starsFetched(TaskResult<[Star]>)
     case createStarTapped
-    case newStarSheet(PresentationAction<CreateStarFeature.Action>)
     case createStarConfirmTapped
     case createStarDismissTapped
     case starCreated(TaskResult<Void>)
@@ -56,11 +53,11 @@ struct ListFeature: ReducerProtocol {
       switch action {
       case .load:
         return .task {
-          await .starssFetched(.init(catching: {
+          await .starsFetched(.init(catching: {
             try await client.fetchStars()
           }))
         }.animation()
-      case let .starssFetched(result):
+      case let .starsFetched(result):
         switch result {
         case let .success(stars):
           state.stars = IdentifiedArray(uniqueElements: stars)
@@ -73,27 +70,25 @@ struct ListFeature: ReducerProtocol {
         }
         return .none
       case .createStarTapped:
-        state.newStarSheet = .init(name: "")
+        state.destination = .sheet(CreateStarFeature.State(name: ""))
         return .none
 
       case .createStarDismissTapped:
-        return .send(.newStarSheet(.dismiss))
+        return .send(.destination(.dismiss))
 
       case .createStarConfirmTapped:
-        guard let name = state.newStarSheet?.name,
-              name.isEmpty == false else {
+        guard case let .sheet(createState) = state.destination,
+              createState.name.isEmpty == false else {
           return .none
         }
         return .merge(
-          .send(.newStarSheet(.dismiss)),
+          .send(.destination(.dismiss)),
           .task {
             await .starCreated(.init(catching: {
-              _ = try await client.createStar(name)
+              _ = try await client.createStar(createState.name)
             }))
           }
         )
-      case .newStarSheet:
-        return .none
       case let .starCreated(result):
         switch result {
         case .success:
@@ -185,9 +180,11 @@ struct ListView: View {
       }
       .sheet(
         store: self.store.scope(
-          state: \.$newStarSheet,
-          action: ListFeature.Action.newStarSheet
-        )
+          state: \.$destination,
+          action: ListFeature.Action.destination
+        ),
+        state: /ListFeature.State.Destination.sheet,
+        action: ListFeature.Action.Destination.sheet
       ) { store in
         NavigationView {
           CreateStarView(store: store)
