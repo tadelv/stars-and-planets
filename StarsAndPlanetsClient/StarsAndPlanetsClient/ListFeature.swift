@@ -133,7 +133,7 @@ struct ListView: View {
   let store: StoreOf<ListFeature>
 
   var body: some View {
-    WithViewStore(store, observe: { $0 }) { viewStore in
+    WithViewStore(store, observe: \.stars) { viewStore in
       NavigationStack {
         List {
           Button {
@@ -144,7 +144,7 @@ struct ListView: View {
               Text("Add star")
             }
           }
-          ForEach(viewStore.stars) { star in
+          ForEach(viewStore.state) { star in
             VStack(alignment: .leading) {
               Text(star.name)
               Text("\(star.planets.count) planets")
