@@ -8,22 +8,29 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct ListFeature: Reducer {
+struct ListFeature: ReducerProtocol {
+
   struct State: Equatable {
     var stars: IdentifiedArrayOf<Star> = []
+    @PresentationState
     var selectedStar: DetailFeature.State?
+    @PresentationState
     var alert: AlertState<Action.Alert>?
+    @PresentationState
+    var newStarSheet: CreateStarFeature.State?
   }
 
   enum Action {
     case load
-    case resultsFetched(TaskResult<[Star]>)
-    case newStar(String)
+    case starssFetched(TaskResult<[Star]>)
+    case createStarTapped
+    case newStarSheet(PresentationAction<CreateStarFeature.Action>)
+    case createStarConfirmTapped
+    case createStarDismissTapped
     case starCreated(TaskResult<Void>)
     case starSelected(Star)
-    case navigateBack
-    case detail(DetailFeature.Action)
-    case alert(AlertAction<Alert>)
+    case detail(PresentationAction<DetailFeature.Action>)
+    case alert(PresentationAction<Alert>)
 
     enum Alert: Equatable {
     }
@@ -31,18 +38,18 @@ struct ListFeature: Reducer {
 
   @Dependency(\.client) var client
 
-  var body: some ReducerProtocol<State, Action> {
-    Reduce { state, action in
+  var body: some ReducerProtocolOf<Self> {
+    Reduce<State, Action> { state, action in
       switch action {
       case .alert:
         return .none
       case .load:
         return .task {
-          await .resultsFetched(.init(catching: {
+          await .starssFetched(.init(catching: {
             try await client.fetchStars()
           }))
         }.animation()
-      case let .resultsFetched(result):
+      case let .starssFetched(result):
         switch result {
         case let .success(stars):
           state.stars = IdentifiedArray(uniqueElements: stars)
@@ -54,12 +61,28 @@ struct ListFeature: Reducer {
           state.alert = .failed(with: error)
         }
         return .none
-      case let .newStar(name):
-        return .task {
-          await .starCreated(.init(catching: {
-            _ = try await client.createStar(name)
-          }))
+      case .createStarTapped:
+        state.newStarSheet = .init(name: "")
+        return .none
+
+      case .createStarDismissTapped:
+        return .send(.newStarSheet(.dismiss))
+
+      case .createStarConfirmTapped:
+        guard let name = state.newStarSheet?.name,
+              name.isEmpty == false else {
+          return .none
         }
+        return .merge(
+          .send(.newStarSheet(.dismiss)),
+          .task {
+            await .starCreated(.init(catching: {
+              _ = try await client.createStar(name)
+            }))
+          }
+        )
+      case .newStarSheet:
+        return .none
       case let .starCreated(result):
         switch result {
         case .success:
@@ -73,18 +96,18 @@ struct ListFeature: Reducer {
       case let .starSelected(star):
         state.selectedStar = DetailFeature.State(star: star)
         return .none
-      case .navigateBack:
-        state.selectedStar = nil
-        return .none
-      case let .detail(.delegate(.planetAdded(star))):
+      case let .detail(.presented(.delegate(.planetAdded(star)))):
         state.stars[id: star.id] = star
         return .none
       case .detail:
         return .none
       }
     }
-    .alert(state: \.alert, action: /Action.alert)
-    .ifLet(\.selectedStar, action: /Action.detail) {
+    .ifLet(\.$alert, action: /Action.alert)
+    .ifLet(\.$newStarSheet, action: /Action.newStarSheet) {
+      CreateStarFeature()
+    }
+    .ifLet(\.$selectedStar, action: /Action.detail) {
       DetailFeature()
     }
   }
@@ -103,14 +126,12 @@ extension AlertState where Action == ListFeature.Action.Alert {
 struct ListView: View {
   let store: StoreOf<ListFeature>
 
-  @State var isShowingSheet = false
-
   var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       NavigationStack {
         List {
           Button {
-            isShowingSheet = true
+            viewStore.send(.createStarTapped)
           } label: {
             HStack {
               Image(systemName: "plus")
@@ -126,62 +147,60 @@ struct ListView: View {
             .onTapGesture {
               viewStore.send(.starSelected(star))
             }
-            .navigationDestination(
-              isPresented: viewStore.binding(get: { $0.selectedStar != nil },
-                                             send: .navigateBack)
-            ) {
-              IfLetStore(store.scope(
-                state: \.selectedStar,
-                action: ListFeature.Action.detail
-              )) {
-                DetailView(store: $0)
-              }
-            }
           }
+        }
+        .navigationDestination(
+          store: self.store.scope(
+            state: \.$selectedStar,
+            action: ListFeature.Action.detail
+          )
+        ) { store in
+          DetailView(store: store)
         }
       }
       .onAppear {
         viewStore.send(.load)
       }
-      .sheet(isPresented: $isShowingSheet) {
-        AddStarView { name in
-          viewStore.send(.newStar(name))
-          isShowingSheet = false
+      .sheet(
+        store: self.store.scope(
+          state: \.$newStarSheet,
+          action: ListFeature.Action.newStarSheet
+        )
+      ) { store in
+        NavigationView {
+          CreateStarView(store: store)
+            .toolbar {
+              ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                  viewStore.send(.createStarDismissTapped)
+                }
+              }
+              ToolbarItem(placement: .primaryAction) {
+                Button("Add") {
+                  viewStore.send(.createStarConfirmTapped)
+                }
+              }
+            }
+            .navigationTitle("New Star")
         }
       }
-      .alert(store: self.store.scope(state: \.alert, action: ListFeature.Action.alert))
-    }
-  }
-}
-
-struct AddStarView: View {
-  @State var name = ""
-
-  let action: (String) -> Void
-
-  @FocusState
-  var focused
-
-  var body: some View {
-    Form {
-      Section("Star name") {
-        TextField("Enter name", text: $name)
-          .focused($focused)
-          .onAppear {
-            focused = true
-          }
-        Button {
-          action(name)
-        } label: {
-          Text("Done")
-        }
-      }
+      .alert(
+        store: self.store.scope(
+          state: \.$alert,
+          action: ListFeature.Action.alert
+        )
+      )
     }
   }
 }
 
 struct ListView_Previews: PreviewProvider {
   static var previews: some View {
-    ListView(store: Store(initialState: ListFeature.State(), reducer: ListFeature()))
+    ListView(
+      store: Store(
+        initialState: ListFeature.State(),
+        reducer: ListFeature()
+      )
+    )
   }
 }
