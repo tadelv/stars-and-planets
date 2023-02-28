@@ -16,16 +16,16 @@ struct ListFeature: ReducerProtocol {
     @PresentationState
     var alert: AlertState<Action.Alert>?
     @PresentationState
-    var newStar: CreateStarFeature.State?
+    var newStarSheet: CreateStarFeature.State?
   }
 
   enum Action {
     case load
-    case resultsFetched(TaskResult<[Star]>)
+    case starssFetched(TaskResult<[Star]>)
     case createStarTapped
-    case dismissCreateStarTapped
-    case newStar(PresentationAction<CreateStarFeature.Action>)
+    case newStarSheet(PresentationAction<CreateStarFeature.Action>)
     case createStarConfirmTapped
+    case createStarDismissTapped
     case starCreated(TaskResult<Void>)
     case starSelected(Star)
     case navigateBack
@@ -45,11 +45,11 @@ struct ListFeature: ReducerProtocol {
         return .none
       case .load:
         return .task {
-          await .resultsFetched(.init(catching: {
+          await .starssFetched(.init(catching: {
             try await client.fetchStars()
           }))
         }.animation()
-      case let .resultsFetched(result):
+      case let .starssFetched(result):
         switch result {
         case let .success(stars):
           state.stars = IdentifiedArray(uniqueElements: stars)
@@ -62,26 +62,26 @@ struct ListFeature: ReducerProtocol {
         }
         return .none
       case .createStarTapped:
-        state.newStar = .init(name: "")
+        state.newStarSheet = .init(name: "")
         return .none
 
-      case .dismissCreateStarTapped:
-        return .send(.newStar(.dismiss))
+      case .createStarDismissTapped:
+        return .send(.newStarSheet(.dismiss))
 
       case .createStarConfirmTapped:
-        guard let name = state.newStar?.name,
+        guard let name = state.newStarSheet?.name,
               name.isEmpty == false else {
           return .none
         }
         return .merge(
-          .send(.newStar(.dismiss)),
+          .send(.newStarSheet(.dismiss)),
           .task {
             await .starCreated(.init(catching: {
               _ = try await client.createStar(name)
             }))
           }
         )
-      case .newStar:
+      case .newStarSheet:
         return .none
       case let .starCreated(result):
         switch result {
@@ -107,7 +107,7 @@ struct ListFeature: ReducerProtocol {
       }
     }
     .ifLet(\.$alert, action: /Action.alert)
-    .ifLet(\.$newStar, action: /Action.newStar) {
+    .ifLet(\.$newStarSheet, action: /Action.newStarSheet) {
       CreateStarFeature()
     }
     .ifLet(\.selectedStar, action: /Action.detail) {
@@ -169,8 +169,8 @@ struct ListView: View {
       }
       .sheet(
         store: self.store.scope(
-          state: \.$newStar,
-          action: ListFeature.Action.newStar
+          state: \.$newStarSheet,
+          action: ListFeature.Action.newStarSheet
         )
       ) { store in
         NavigationView {
@@ -178,7 +178,7 @@ struct ListView: View {
             .toolbar {
               ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
-                  viewStore.send(.dismissCreateStarTapped)
+                  viewStore.send(.createStarDismissTapped)
                 }
               }
               ToolbarItem(placement: .primaryAction) {
