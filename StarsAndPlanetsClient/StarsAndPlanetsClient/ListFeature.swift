@@ -15,9 +15,16 @@ struct ListFeature: ReducerProtocol {
     @PresentationState
     var selectedStar: DetailFeature.State?
     @PresentationState
-    var alert: AlertState<Action.Alert>?
-    @PresentationState
     var newStarSheet: CreateStarFeature.State?
+
+    @PresentationState
+    var destination: Destination?
+
+    enum Destination: Equatable {
+      case detail(DetailFeature.State)
+      case alert(AlertState<Action.Alert>)
+      case sheet(CreateStarFeature.State)
+    }
   }
 
   enum Action {
@@ -30,9 +37,15 @@ struct ListFeature: ReducerProtocol {
     case starCreated(TaskResult<Void>)
     case starSelected(Star)
     case detail(PresentationAction<DetailFeature.Action>)
-    case alert(PresentationAction<Alert>)
+    case destination(PresentationAction<Destination>)
 
     enum Alert: Equatable {
+    }
+
+    enum Destination: Equatable {
+      case detail(DetailFeature.Action)
+      case alert(Alert)
+      case sheet(CreateStarFeature.Action)
     }
   }
 
@@ -41,8 +54,6 @@ struct ListFeature: ReducerProtocol {
   var body: some ReducerProtocolOf<Self> {
     Reduce<State, Action> { state, action in
       switch action {
-      case .alert:
-        return .none
       case .load:
         return .task {
           await .starssFetched(.init(catching: {
@@ -58,7 +69,7 @@ struct ListFeature: ReducerProtocol {
             state.selectedStar = DetailFeature.State(star: found)
           }
         case let .failure(error):
-          state.alert = .failed(with: error)
+          state.destination = .alert(.failed(with: error))
         }
         return .none
       case .createStarTapped:
@@ -90,7 +101,7 @@ struct ListFeature: ReducerProtocol {
             .load
           }
         case let .failure(error):
-          state.alert = .failed(with: error)
+          state.destination = .alert(.failed(with: error))
           return .none
         }
       case let .starSelected(star):
@@ -101,15 +112,26 @@ struct ListFeature: ReducerProtocol {
         return .none
       case .detail:
         return .none
+      case .destination:
+        return .none
       }
     }
-    .ifLet(\.$alert, action: /Action.alert)
-    .ifLet(\.$newStarSheet, action: /Action.newStarSheet) {
-      CreateStarFeature()
+    .ifLet(\.$destination, action: /Action.destination) {
+      Scope(state: /State.Destination.alert, action: /Action.Destination.alert) {}
+      Scope(state: /State.Destination.sheet, action: /Action.Destination.sheet) {
+        CreateStarFeature()
+      }
+      Scope(state: /State.Destination.detail, action: /Action.Destination.detail) {
+        DetailFeature()
+      }
     }
-    .ifLet(\.$selectedStar, action: /Action.detail) {
-      DetailFeature()
-    }
+//    .ifLet(\.$alert, action: /Action.alert)
+//    .ifLet(\.$newStarSheet, action: /Action.newStarSheet) {
+//      CreateStarFeature()
+//    }
+//    .ifLet(\.$selectedStar, action: /Action.detail) {
+//      DetailFeature()
+//    }
   }
 }
 
@@ -185,10 +207,9 @@ struct ListView: View {
         }
       }
       .alert(
-        store: self.store.scope(
-          state: \.$alert,
-          action: ListFeature.Action.alert
-        )
+        store: self.store.scope(state: \.$destination, action: ListFeature.Action.destination),
+        state: /ListFeature.State.Destination.alert,
+        action: ListFeature.Action.Destination.alert
       )
     }
   }
