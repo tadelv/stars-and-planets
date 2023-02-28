@@ -12,8 +12,6 @@ struct ListFeature: ReducerProtocol {
 
   struct State: Equatable {
     var stars: IdentifiedArrayOf<Star> = []
-    @PresentationState
-    var selectedStar: DetailFeature.State?
 
     @PresentationState
     var destination: Destination?
@@ -33,7 +31,6 @@ struct ListFeature: ReducerProtocol {
     case createStarDismissTapped
     case starCreated(TaskResult<Void>)
     case starSelected(Star)
-    case detail(PresentationAction<DetailFeature.Action>)
     case destination(PresentationAction<Destination>)
 
     enum Alert: Equatable {
@@ -61,9 +58,10 @@ struct ListFeature: ReducerProtocol {
         switch result {
         case let .success(stars):
           state.stars = IdentifiedArray(uniqueElements: stars)
-          if let selected = state.selectedStar?.star,
-             let found = state.stars[id: selected.id] {
-            state.selectedStar = DetailFeature.State(star: found)
+          // not sure if this is still needed since we update the star from DetailFeature
+          if case let .detail(detailState) = state.destination,
+             let found = state.stars[id: detailState.star.id] {
+            state.destination = .detail(DetailFeature.State(star: found))
           }
         case let .failure(error):
           state.destination = .alert(.failed(with: error))
@@ -100,12 +98,10 @@ struct ListFeature: ReducerProtocol {
           return .none
         }
       case let .starSelected(star):
-        state.selectedStar = DetailFeature.State(star: star)
+        state.destination = .detail(DetailFeature.State(star: star))
         return .none
-      case let .detail(.presented(.delegate(.planetAdded(star)))):
+      case let .destination(.presented(.detail(.delegate(.planetAdded(star))))):
         state.stars[id: star.id] = star
-        return .none
-      case .detail:
         return .none
       case .destination:
         return .none
@@ -120,13 +116,6 @@ struct ListFeature: ReducerProtocol {
         DetailFeature()
       }
     }
-//    .ifLet(\.$alert, action: /Action.alert)
-//    .ifLet(\.$newStarSheet, action: /Action.newStarSheet) {
-//      CreateStarFeature()
-//    }
-//    .ifLet(\.$selectedStar, action: /Action.detail) {
-//      DetailFeature()
-//    }
   }
 }
 
@@ -168,9 +157,11 @@ struct ListView: View {
         }
         .navigationDestination(
           store: self.store.scope(
-            state: \.$selectedStar,
-            action: ListFeature.Action.detail
-          )
+            state: \.$destination,
+            action: ListFeature.Action.destination
+          ),
+          state: /ListFeature.State.Destination.detail,
+          action: ListFeature.Action.Destination.detail
         ) { store in
           DetailView(store: store)
         }
