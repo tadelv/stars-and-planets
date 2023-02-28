@@ -12,6 +12,7 @@ struct ListFeature: ReducerProtocol {
 
   struct State: Equatable {
     var stars: IdentifiedArrayOf<Star> = []
+    @PresentationState
     var selectedStar: DetailFeature.State?
     @PresentationState
     var alert: AlertState<Action.Alert>?
@@ -28,8 +29,7 @@ struct ListFeature: ReducerProtocol {
     case createStarDismissTapped
     case starCreated(TaskResult<Void>)
     case starSelected(Star)
-    case navigateBack
-    case detail(DetailFeature.Action)
+    case detail(PresentationAction<DetailFeature.Action>)
     case alert(PresentationAction<Alert>)
 
     enum Alert: Equatable {
@@ -38,7 +38,7 @@ struct ListFeature: ReducerProtocol {
 
   @Dependency(\.client) var client
 
-  var body: some ReducerProtocol<State, Action> {
+  var body: some ReducerProtocolOf<Self> {
     Reduce<State, Action> { state, action in
       switch action {
       case .alert:
@@ -96,10 +96,7 @@ struct ListFeature: ReducerProtocol {
       case let .starSelected(star):
         state.selectedStar = DetailFeature.State(star: star)
         return .none
-      case .navigateBack:
-        state.selectedStar = nil
-        return .none
-      case let .detail(.delegate(.planetAdded(star))):
+      case let .detail(.presented(.delegate(.planetAdded(star)))):
         state.stars[id: star.id] = star
         return .none
       case .detail:
@@ -110,7 +107,7 @@ struct ListFeature: ReducerProtocol {
     .ifLet(\.$newStarSheet, action: /Action.newStarSheet) {
       CreateStarFeature()
     }
-    .ifLet(\.selectedStar, action: /Action.detail) {
+    .ifLet(\.$selectedStar, action: /Action.detail) {
       DetailFeature()
     }
   }
@@ -150,18 +147,15 @@ struct ListView: View {
             .onTapGesture {
               viewStore.send(.starSelected(star))
             }
-            .navigationDestination(
-              isPresented: viewStore.binding(get: { $0.selectedStar != nil },
-                                             send: .navigateBack)
-            ) {
-              IfLetStore(store.scope(
-                state: \.selectedStar,
-                action: ListFeature.Action.detail
-              )) {
-                DetailView(store: $0)
-              }
-            }
           }
+        }
+        .navigationDestination(
+          store: self.store.scope(
+            state: \.$selectedStar,
+            action: ListFeature.Action.detail
+          )
+        ) { store in
+          DetailView(store: store)
         }
       }
       .onAppear {
