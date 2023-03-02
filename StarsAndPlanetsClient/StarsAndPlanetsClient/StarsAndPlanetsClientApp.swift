@@ -10,24 +10,18 @@ import SwiftUI
 
 @main
 struct StarsAndPlanetsClientApp: App {
-  var isUnitTesting: Bool {
-    if NSClassFromString("XCTestCase") != nil {
-      return true
-    }
-    return false
-  }
 
   var body: some Scene {
     WindowGroup {
-      if isUnitTesting {
-        EmptyView()
-      } else {
+      if !_XCTIsTesting {
         ListView(
           store: Store(
             initialState: ListFeature.State(),
-            reducer: ListFeature()._printChanges()
+            reducer: ListFeature()
           )
         )
+      } else {
+        EmptyView()
       }
     }
   }
