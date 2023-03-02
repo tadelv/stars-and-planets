@@ -58,11 +58,6 @@ struct ListFeature: ReducerProtocol {
         switch result {
         case let .success(stars):
           state.stars = IdentifiedArray(uniqueElements: stars)
-          // not sure if this is still needed since we update the star from DetailFeature
-          if case let .detail(detailState) = state.destination,
-             let found = state.stars[id: detailState.star.id] {
-            state.destination = .detail(DetailFeature.State(star: found))
-          }
         case let .failure(error):
           state.destination = .alert(.failed(with: error))
         }
@@ -98,7 +93,7 @@ struct ListFeature: ReducerProtocol {
           return .none
         }
       case let .starSelected(star):
-        state.destination = .detail(DetailFeature.State(star: star))
+        state.destination = .detail(DetailFeature.State(loadableStar: .success(star)))
         return .none
       case let .destination(.presented(.detail(.delegate(.planetAdded(star))))):
         state.stars[id: star.id] = star

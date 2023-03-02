@@ -22,7 +22,7 @@ final class DetailFeatureTests: XCTestCase {
 
   func testAddingPlanetSucceeds() async throws {
     var star = Star(id: "1", name: "A", planets: [])
-    let store = TestStore(initialState: DetailFeature.State(star: star),
+    let store = TestStore(initialState: DetailFeature.State(loadableStar: .success(star)),
                           reducer: DetailFeature())
     store.dependencies.client.createPlanet = { _, _ in
       true
@@ -34,11 +34,13 @@ final class DetailFeatureTests: XCTestCase {
       planets
     }
 
-    await store.send(.addPlanet("test"))
-    await store.receive(.planetAdded(.success(true)))
-    await store.receive(.loadPlanets)
-    await store.receive(.planetsFetched(.success(planets))) {
-      $0.star.planets = planets
+    await store.send(.addPlanet("test")) {
+      $0.loadableStar = .loading
+    }
+    await store.receive(.planetAdded(star, .success(true)))
+    await store.receive(.loadPlanets(star))
+    await store.receive(.planetsFetched(star, .success(planets))) {
+      $0.loadableStar = .success(.init(id: "1", name: "A", planets: planets))
     }
 
     star.planets = planets
@@ -47,7 +49,7 @@ final class DetailFeatureTests: XCTestCase {
 
   func testAddingPlanetFails() async throws {
     let star = Star(id: "1", name: "A", planets: [])
-    let store = TestStore(initialState: DetailFeature.State(star: star),
+    let store = TestStore(initialState: DetailFeature.State(loadableStar: .success(star)),
                           reducer: DetailFeature())
 
     struct TestError: Error, Equatable {}
@@ -56,7 +58,11 @@ final class DetailFeatureTests: XCTestCase {
       throw TestError()
     }
 
-    await store.send(.addPlanet("test"))
-    await store.receive(.planetAdded(.failure(TestError())))
+    await store.send(.addPlanet("test")) {
+      $0.loadableStar = .loading
+    }
+    await store.receive(.planetAdded(star, .failure(TestError()))) {
+      $0.loadableStar = .failed(TestError())
+    }
   }
 }

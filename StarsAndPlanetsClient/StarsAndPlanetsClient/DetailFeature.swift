@@ -10,14 +10,14 @@ import SwiftUI
 
 struct DetailFeature: ReducerProtocol {
   struct State: Equatable {
-    var star: Star
+    var loadableStar: Loadable<Star>
   }
 
   enum Action: Equatable {
     case addPlanet(String)
-    case planetAdded(TaskResult<Bool>)
-    case loadPlanets
-    case planetsFetched(TaskResult<[Planet]>)
+    case planetAdded(Star, TaskResult<Bool>)
+    case loadPlanets(Star)
+    case planetsFetched(Star, TaskResult<[Planet]>)
     case delegate(Delegate)
 
     enum Delegate: Equatable {
@@ -30,35 +30,39 @@ struct DetailFeature: ReducerProtocol {
   func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
     switch action {
     case let .addPlanet(name):
-      return .task { [star = state.star] in
-        await .planetAdded(.init(catching: {
+      guard let star = state.loadableStar.value else {
+        return .none
+      }
+      state.loadableStar = .loading
+      return .task {
+        await .planetAdded(star, .init(catching: {
           try await client.createPlanet(star, name)
         }))
       }
-    case let .planetAdded(result):
+    case let .planetAdded(star, result):
       switch result {
-      case .failure:
-        // TODO: show error
+      case let .failure(error):
+        state.loadableStar = .failed(error)
         return .none
       case .success:
-        return .send(.loadPlanets)
+        return .send(.loadPlanets(star))
       }
     case .delegate:
       return .none
-    case .loadPlanets:
-      return .task { [star = state.star] in
-        await .planetsFetched(.init(catching: {
+    case let .loadPlanets(star):
+      return .task {
+        await .planetsFetched(star, .init(catching: {
           try await client.starsPlanets(star)
         }))
       }.animation()
-    case let .planetsFetched(result):
-      switch result {
-      case let .success(planets):
-        state.star.planets = planets
-        return .send(.delegate(.planetAdded(state.star)))
-      case let .failure(error):
-        break
-      }
+    case let .planetsFetched(star, .success(planets)):
+      var mutableStar = star
+      mutableStar.planets = planets
+      state.loadableStar = .success(mutableStar)
+      return .send(.delegate(.planetAdded(mutableStar)))
+
+    case let .planetsFetched(_, .failure(error)):
+      state.loadableStar = .failed(error)
       return .none
     }
   }
@@ -70,9 +74,9 @@ struct DetailView: View {
   @State var newPlanetName: String = ""
 
   var body: some View {
-    WithViewStore(store, observe: { $0 }) { viewStore in
+    LoadableViewStore(loadable: self.store.scope(state: \.loadableStar)) { viewStore in
       List {
-        ForEach(viewStore.star.planets) { planet in
+        ForEach(viewStore.planets) { planet in
           Text(planet.name)
         }
         TextField("New planet name", text: $newPlanetName)
@@ -81,13 +85,35 @@ struct DetailView: View {
             newPlanetName = ""
           }
       }
+    } failedView: { viewStore in
+      Text("Failure: \(viewStore.state.localizedDescription)")
+    } waitingView: { viewStore in
+      ProgressView("Loading")
     }
+//    WithViewStore(store, observe: { $0 }) { viewStore in
+//      List {
+//        ForEach(viewStore.star.planets) { planet in
+//          Text(planet.name)
+//        }
+//        TextField("New planet name", text: $newPlanetName)
+//          .onSubmit {
+//            viewStore.send(.addPlanet(newPlanetName))
+//            newPlanetName = ""
+//          }
+//      }
+//    }
   }
 }
 
 struct DetailViewPreview: PreviewProvider {
   static var previews: some View {
-    DetailView(store: StoreOf<DetailFeature>(initialState: DetailFeature.State(star: .init(id: "1", name: "Sun", planets: [.init(id: "1", name: "Earth")])),
-                              reducer: DetailFeature()))
+    DetailView(
+      store: StoreOf<DetailFeature>(
+        initialState: DetailFeature.State(
+          loadableStar: .success(.init(id: "1", name: "Star", planets: []))
+          ),
+        reducer: DetailFeature()
+      )
+    )
   }
 }
