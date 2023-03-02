@@ -39,14 +39,11 @@ struct DetailFeature: ReducerProtocol {
           try await client.createPlanet(star, name)
         }))
       }
-    case let .planetAdded(star, result):
-      switch result {
-      case let .failure(error):
-        state.loadableStar = .failed(error)
-        return .none
-      case .success:
-        return .send(.loadPlanets(star))
-      }
+    case let .planetAdded(_, .failure(error)):
+      state.loadableStar = .failed(error)
+      return .none
+    case let .planetAdded(star, .success):
+      return .send(.loadPlanets(star))
     case .delegate:
       return .none
     case let .loadPlanets(star):
