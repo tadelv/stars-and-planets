@@ -24,7 +24,7 @@ struct ListFeature: ReducerProtocol {
   }
 
   enum Action {
-    case load
+    case viewAppeared
     case starsFetched(TaskResult<[Star]>)
     case createStarTapped
     case createStarConfirmTapped
@@ -48,11 +48,11 @@ struct ListFeature: ReducerProtocol {
   var body: some ReducerProtocolOf<Self> {
     Reduce<State, Action> { state, action in
       switch action {
-      case .load:
+      case .viewAppeared:
         return .task {
-          await .starsFetched(.init(catching: {
+          await .starsFetched(TaskResult {
             try await client.fetchStars()
-          }))
+          })
         }.animation()
       case let .starsFetched(result):
         switch result {
@@ -67,31 +67,25 @@ struct ListFeature: ReducerProtocol {
         return .none
 
       case .createStarDismissTapped:
-        return .send(.destination(.dismiss))
+        state.destination = nil
+        return .none
 
       case .createStarConfirmTapped:
         guard case let .sheet(createState) = state.destination,
               createState.name.isEmpty == false else {
           return .none
         }
-        return .merge(
-          .send(.destination(.dismiss)),
-          .task {
-            await .starCreated(.init(catching: {
-              _ = try await client.createStar(createState.name)
-            }))
-          }
-        )
-      case let .starCreated(result):
-        switch result {
-        case .success:
-          return .task {
-            .load
-          }
-        case let .failure(error):
-          state.destination = .alert(.failed(with: error))
-          return .none
+        state.destination = nil
+        return .task {
+          await .starCreated(TaskResult {
+            _ = try await client.createStar(createState.name)
+          })
         }
+      case .starCreated(.success):
+        return .send(.viewAppeared)
+      case let .starCreated(.failure(error)):
+        state.destination = .alert(.failed(with: error))
+        return .none
       case let .starSelected(star):
         state.destination = .detail(DetailFeature.State(loadableStar: .success(star)))
         return .none
@@ -140,13 +134,14 @@ struct ListView: View {
             }
           }
           ForEach(viewStore.state) { star in
-            VStack(alignment: .leading) {
-              Text(star.name)
-              Text("\(star.planets.count) planets")
-            }
-            .clipShape(Rectangle())
-            .onTapGesture {
+            Button {
               viewStore.send(.starSelected(star))
+            } label: {
+              VStack(alignment: .leading) {
+                Text(star.name)
+                Text("\(star.planets.count) planets")
+              }
+              .foregroundColor(.primary)
             }
           }
         }
@@ -161,8 +156,8 @@ struct ListView: View {
           DetailView(store: store)
         }
       }
-      .onAppear {
-        viewStore.send(.load)
+      .task {
+        viewStore.send(.viewAppeared)
       }
       .sheet(
         store: self.store.scope(
