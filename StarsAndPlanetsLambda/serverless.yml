@@ -1,0 +1,26 @@
+service: stars-and-planets-lambda
+
+package:
+    artifact: .build/lambda/StarsAndPlanetsLambda/lambda.zip
+
+provider:
+    name: aws
+    runtime: provided.al2
+    architecture: arm64
+    region: eu-central-1
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+          Resource: "*"
+
+functions:
+    query:
+        handler: StarsAndPlanetsLambda.handler
+        memorySize: 128
+        events:
+          - httpApi:
+              path: /graphql
+              method: post

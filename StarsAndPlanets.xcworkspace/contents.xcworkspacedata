@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:StarsAndPlanetsLambda">
+   </FileRef>
+   <FileRef
       location = "group:StarsAndPlanetsClient/StarsAndPlanetsClient.xcodeproj">
    </FileRef>
    <FileRef
