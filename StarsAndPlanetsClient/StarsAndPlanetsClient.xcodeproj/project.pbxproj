@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		18222B9C29AD37FC00549527 /* CreateStarFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18222B9B29AD37FC00549527 /* CreateStarFeature.swift */; };
+		182B875829EB115400C499C2 /* StarsAndPlanetsApollo in Frameworks */ = {isa = PBXBuildFile; productRef = 182B875729EB115400C499C2 /* StarsAndPlanetsApollo */; };
 		1832A971299E187100FF8310 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 1832A970299E187100FF8310 /* ComposableArchitecture */; };
 		1832A973299E1F6300FF8310 /* ListFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A972299E1F6300FF8310 /* ListFeature.swift */; };
 		1832A975299E214300FF8310 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832A974299E214300FF8310 /* Client.swift */; };
@@ -18,7 +19,6 @@
 		18DB946B299D6D2100772713 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18DB946A299D6D2100772713 /* Assets.xcassets */; };
 		18DB946F299D6D2100772713 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18DB946E299D6D2100772713 /* Preview Assets.xcassets */; };
 		18DB9477299D6E0E00772713 /* Apollo in Frameworks */ = {isa = PBXBuildFile; productRef = 18DB9476299D6E0E00772713 /* Apollo */; };
-		18DB9482299D74BD00772713 /* StarsAndPlanetsApollo in Frameworks */ = {isa = PBXBuildFile; productRef = 18DB9481299D74BD00772713 /* StarsAndPlanetsApollo */; };
 		18DB9485299E0E0C00772713 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DB9484299E0E0C00772713 /* Models.swift */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		18222B9B29AD37FC00549527 /* CreateStarFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateStarFeature.swift; sourceTree = "<group>"; };
+		182B875629EB113F00C499C2 /* StarsAndPlanetsApollo */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = StarsAndPlanetsApollo; sourceTree = "<group>"; };
 		1832A972299E1F6300FF8310 /* ListFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFeature.swift; sourceTree = "<group>"; };
 		1832A974299E214300FF8310 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
 		1832A976299EA48400FF8310 /* DetailFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailFeature.swift; sourceTree = "<group>"; };
@@ -44,7 +45,6 @@
 		18DB946A299D6D2100772713 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		18DB946C299D6D2100772713 /* StarsAndPlanetsClient.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StarsAndPlanetsClient.entitlements; sourceTree = "<group>"; };
 		18DB946E299D6D2100772713 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		18DB947D299D744500772713 /* StarsAndPlanetsApollo */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = StarsAndPlanetsApollo; sourceTree = "<group>"; };
 		18DB9484299E0E0C00772713 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -62,8 +62,8 @@
 			files = (
 				18C9DA3329ACD29C00FD1B28 /* SwiftUINavigation in Frameworks */,
 				18DB9477299D6E0E00772713 /* Apollo in Frameworks */,
-				18DB9482299D74BD00772713 /* StarsAndPlanetsApollo in Frameworks */,
 				1832A971299E187100FF8310 /* ComposableArchitecture in Frameworks */,
+				182B875829EB115400C499C2 /* StarsAndPlanetsApollo in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,7 +125,7 @@
 		18DB947C299D744500772713 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				18DB947D299D744500772713 /* StarsAndPlanetsApollo */,
+				182B875629EB113F00C499C2 /* StarsAndPlanetsApollo */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -181,9 +181,9 @@
 			name = StarsAndPlanetsClient;
 			packageProductDependencies = (
 				18DB9476299D6E0E00772713 /* Apollo */,
-				18DB9481299D74BD00772713 /* StarsAndPlanetsApollo */,
 				1832A970299E187100FF8310 /* ComposableArchitecture */,
 				18C9DA3229ACD29C00FD1B28 /* SwiftUINavigation */,
+				182B875729EB115400C499C2 /* StarsAndPlanetsApollo */,
 			);
 			productName = StarsAndPlanetsClient;
 			productReference = 18DB9463299D6D1F00772713 /* StarsAndPlanetsClient.app */;
@@ -564,6 +564,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		182B875729EB115400C499C2 /* StarsAndPlanetsApollo */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StarsAndPlanetsApollo;
+		};
 		1832A970299E187100FF8310 /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1832A96F299E187100FF8310 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
@@ -578,10 +582,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 18DB9475299D6E0E00772713 /* XCRemoteSwiftPackageReference "apollo-ios" */;
 			productName = Apollo;
-		};
-		18DB9481299D74BD00772713 /* StarsAndPlanetsApollo */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = StarsAndPlanetsApollo;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

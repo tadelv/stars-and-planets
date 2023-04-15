@@ -28,7 +28,7 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
 
   public struct Data: StarsAndPlanetsApollo.SelectionSet {
     public let __data: DataDict
-    public init(data: DataDict) { __data = data }
+    public init(_dataDict data: DataDict) { __data = data }
 
     public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
@@ -42,7 +42,7 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
     /// Parent Type: `Planet`
     public struct StarsPlanet: StarsAndPlanetsApollo.SelectionSet {
       public let __data: DataDict
-      public init(data: DataDict) { __data = data }
+      public init(_dataDict data: DataDict) { __data = data }
 
       public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Planet }
       public static var __selections: [ApolloAPI.Selection] { [

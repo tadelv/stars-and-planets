@@ -2,8 +2,6 @@
 import Foundation
 import AWSLambdaRuntime
 import AWSLambdaEvents
-import Graphiti
-import GraphQL
 import NIO
 
 @main
@@ -21,24 +19,26 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
     if request.isBase64Encoded {
       query = body.base64Decoded() ?? ""
     }
+    do {
+      context.logger.log(level: .info, "trying to decode \(body)")
+      if let data = body.data(using: .utf8) {
+        context.logger.log(level: .info, "extracting json")
+        let queryObject = try JSONDecoder().decode(InputQuery.self, from: data)
+        context.logger.log(level: .info, "assigning: \(queryObject.query)")
+        query = queryObject.query
+      } else {
+        context.logger.log(level: .error, "Failed to get data from body")
+      }
+    } catch {
+      context.logger.log(level: .error, "Failed to decode, using raw: \(error)")
+    }
     guard query.isEmpty == false else {
       return .init(statusCode: .badRequest)
     }
 
     context.logger.log(level: .info, "querying with: \(query)")
 
-    let api = MessageAPI(
-      resolver: Resolver(),
-      schema: try! Schema<Resolver, Context> {
-        Type(Message.self) {
-          Field("content", at: \.content)
-        }
-
-        Query {
-          Field("message", at: Resolver.message)
-        }
-      }
-    )
+    let api = StarsAPI.create()
 
     let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
     defer {
@@ -48,7 +48,7 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
     do {
       let result = try await api.asyncExecute(
         request: query,
-        context: Context(),
+        context: StarsAndPlanetsContext(),
         on: group)
       context.logger.log(level: .info, "\(result)")
       return APIGatewayV2Response(statusCode: .ok, body: result.description)
@@ -59,50 +59,15 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
   }
 }
 
-struct Message : Codable {
-  let content: String
-}
-
-struct Context {
-  func message() -> Message {
-    Message(content: "Hello, world!")
-  }
-}
-
-struct Resolver {
-  func message(context: Context, arguments: NoArguments) -> Message {
-    context.message()
-  }
-}
-
-struct MessageAPI : API {
-  let resolver: Resolver
-  let schema: Schema<Resolver, Context>
-}
-
-extension API {
-  func asyncExecute(request: String,
-                    context: ContextType,
-                    on group: EventLoopGroup) async throws -> GraphQLResult {
-    try await withCheckedThrowingContinuation { continuation in
-      do {
-        let result = try self
-          .execute(request: request,
-                   context: context,
-                   on: group)
-          .wait()
-        continuation.resume(returning: result)
-      } catch {
-        continuation.resume(throwing: error)
-      }
-    }
-  }
-}
-
 // https://stackoverflow.com/a/46969102
 extension String {
   func base64Decoded() -> String? {
     guard let data = Data(base64Encoded: self) else { return nil }
     return String(data: data, encoding: .utf8)
   }
+}
+
+struct InputQuery: Codable {
+  let operationName: String
+  let query: String
 }
