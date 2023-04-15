@@ -19,7 +19,7 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
     context.logger.log(level: .info, "received: \(body)")
     var query = body
     if request.isBase64Encoded {
-      query = String.fromBase64(body) ?? ""
+      query = body.base64Decoded() ?? ""
     }
     guard query.isEmpty == false else {
       return .init(statusCode: .badRequest)
@@ -45,13 +45,17 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
       try? group.syncShutdownGracefully()
     }
 
-    let result = try! await api.asyncExecute(
-      request: query,
-      context: Context(),
-      on: group)
-    context.logger.log(level: .info, "\(result)")
-
-    return APIGatewayV2Response(statusCode: .ok, body: result.description)
+    do {
+      let result = try await api.asyncExecute(
+        request: query,
+        context: Context(),
+        on: group)
+      context.logger.log(level: .info, "\(result)")
+      return APIGatewayV2Response(statusCode: .ok, body: result.description)
+    } catch {
+      context.logger.log(level: .error, "failed: \(error)")
+      return .init(statusCode: .internalServerError, body: error.localizedDescription)
+    }
   }
 }
 
@@ -95,29 +99,10 @@ extension API {
   }
 }
 
-extension Data {
-  /// Same as ``Data(base64Encoded:)``, but adds padding automatically
-  /// (if missing, instead of returning `nil`).
-  public static func fromBase64(_ encoded: String) -> Data? {
-    // Prefixes padding-character(s) (if needed).
-    var encoded = encoded;
-    let remainder = encoded.count % 4
-    if remainder > 0 {
-      encoded = encoded.padding(
-        toLength: encoded.count + 4 - remainder,
-        withPad: "=", startingAt: 0);
-    }
-
-    // Finally, decode.
-    return Data(base64Encoded: encoded);
-  }
-}
-
+// https://stackoverflow.com/a/46969102
 extension String {
-  public static func fromBase64(_ encoded: String) -> String? {
-    if let data = Data.fromBase64(encoded) {
-      return String(data: data, encoding: .utf8)
-    }
-    return nil;
+  func base64Decoded() -> String? {
+    guard let data = Data(base64Encoded: self) else { return nil }
+    return String(data: data, encoding: .utf8)
   }
 }
