@@ -2,6 +2,7 @@
 import Foundation
 import AWSLambdaRuntime
 import AWSLambdaEvents
+import GraphQL
 import NIO
 
 @main
@@ -16,6 +17,33 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
     }
     context.logger.log(level: .info, "received: \(body)")
     var query = body
+    extractQuery(request, &query, body, context)
+    guard query.isEmpty == false else {
+      return .init(statusCode: .badRequest)
+    }
+
+    context.logger.log(level: .info, "querying with: \(query)")
+
+    let api = StarsAPI.create()
+
+    let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    defer {
+      try? group.syncShutdownGracefully()
+    }
+
+    let result = try await api.asyncExecute(
+      request: query,
+      context: StarsAndPlanetsContext(),
+      on: group)
+    context.logger.log(level: .info, "returning: \(result)")
+    return APIGatewayV2Response(statusCode: .ok, body: result.description)
+  }
+
+  private func extractQuery(
+    _ request: APIGatewayV2Request,
+    _ query: inout String,
+    _ body: String,
+    _ context: LambdaContext) {
     if request.isBase64Encoded {
       query = body.base64Decoded() ?? ""
     }
@@ -31,30 +59,6 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
       }
     } catch {
       context.logger.log(level: .error, "Failed to decode, using raw: \(error)")
-    }
-    guard query.isEmpty == false else {
-      return .init(statusCode: .badRequest)
-    }
-
-    context.logger.log(level: .info, "querying with: \(query)")
-
-    let api = StarsAPI.create()
-
-    let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-    defer {
-      try? group.syncShutdownGracefully()
-    }
-
-    do {
-      let result = try await api.asyncExecute(
-        request: query,
-        context: StarsAndPlanetsContext(),
-        on: group)
-      context.logger.log(level: .info, "\(result)")
-      return APIGatewayV2Response(statusCode: .ok, body: result.description)
-    } catch {
-      context.logger.log(level: .error, "failed: \(error)")
-      return .init(statusCode: .internalServerError, body: error.localizedDescription)
     }
   }
 }
