@@ -29,6 +29,7 @@ struct StarsAndPlanetsContext {
     case starsTableNotFound
     case planetsTableNotFound
     case starsNotFound
+    case planetsNotFound
   }
 
   init() async throws {
@@ -58,6 +59,8 @@ struct StarsAndPlanetsContext {
 //        ]
 //      )
 //    ]
+    let planets = try await planets()
+
     let input = ScanInput(tableName: starsTable)
     let queryResult = try await client.scan(input: input)
     guard let items = queryResult.items else {
@@ -69,7 +72,44 @@ struct StarsAndPlanetsContext {
         return nil
       }
 //      Star(id: $0["id"], name: $0["name"], planets: [])
-      return Star(id: id, name: name, planets: [])
+      return Star(id: id, name: name, planets: planets.filter({ $0.starId == id }))
     }
+  }
+
+  func planets() async throws -> [Planet] {
+    let input = ScanInput(tableName: planetsTable)
+    let queryResult = try await client.scan(input: input)
+    guard let items = queryResult.items else {
+      throw ContextError.planetsNotFound
+    }
+    return items.compactMap {
+      guard case let .s(id) = $0["planetId"],
+            case let .s(name) = $0["name"],
+            case let .s(starId) = $0["starId"] else {
+        return nil
+      }
+      //      Star(id: $0["id"], name: $0["name"], planets: [])
+      return Planet(id: id, name: name, starId: starId)
+    }
+  }
+
+  func createStar(_ name: String) async throws -> Star {
+    let stars = try await stars()
+    let newId = stars.reduce(into: 0) { res, element in
+      res = Int(element.id)! > res ? Int(element.id)! + 1 : res
+    }
+    let newStar = Star(id: "\(newId)", name: name, planets: [])
+
+    let input = PutItemInput(
+      item: [
+        "starId": .s(newStar.id),
+        "name": .s(newStar.name)
+      ],
+      tableName: starsTable
+    )
+
+    _ = try await client.putItem(input: input)
+
+    return newStar
   }
 }

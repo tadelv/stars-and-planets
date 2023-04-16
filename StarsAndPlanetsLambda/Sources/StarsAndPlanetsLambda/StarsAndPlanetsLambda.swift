@@ -16,27 +16,35 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
       return .init(statusCode: .badRequest)
     }
     context.logger.info("received: \(body)")
-    var query = body
-    extractQuery(request, &query, body, context)
-    guard query.isEmpty == false else {
-      return .init(statusCode: .badRequest)
+
+    guard let bodyData = body.data(using: .utf8) else {
+      context.logger.error("failed to get data from body")
+      return .init(statusCode: .internalServerError)
+    }
+
+    let query: InputQuery
+    do {
+      query = try JSONDecoder().decode(InputQuery.self, from: bodyData)
+    } catch {
+      return .init(statusCode: .badRequest, body: "\(error)")
     }
 
     context.logger.info("querying with: \(query)")
 
     let api = StarsAPI.create()
 
-    let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-    defer {
-      try? group.syncShutdownGracefully()
-    }
+//    let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+//    defer {
+//      try? group.syncShutdownGracefully()
+//    }
 
     let apiContext = try await StarsAndPlanetsContext()
 
     let result = try await api.asyncExecute(
-      request: query,
+      request: query.query,
       context: apiContext,
-      on: group)
+      on: context.eventLoop,
+      variables: query.variables)
     context.logger.info("returning: \(result)")
     return APIGatewayV2Response(statusCode: .ok, body: result.description)
   }
@@ -74,6 +82,7 @@ extension String {
 }
 
 struct InputQuery: Codable {
-  let operationName: String
+  let operationName: String?
   let query: String
+  let variables: [String: Map]?
 }
