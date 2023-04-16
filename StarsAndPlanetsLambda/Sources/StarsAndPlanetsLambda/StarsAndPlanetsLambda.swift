@@ -51,29 +51,6 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
     }
     return APIGatewayV2Response(statusCode: .ok, body: result.description)
   }
-
-  private func extractQuery(
-    _ request: APIGatewayV2Request,
-    _ query: inout String,
-    _ body: String,
-    _ context: LambdaContext) {
-    if request.isBase64Encoded {
-      query = body.base64Decoded() ?? ""
-    }
-    do {
-      context.logger.info("trying to decode \(body)")
-      if let data = body.data(using: .utf8) {
-        context.logger.log(level: .info, "extracting json")
-        let queryObject = try JSONDecoder().decode(InputQuery.self, from: data)
-        context.logger.info("assigning: \(queryObject.query)")
-        query = queryObject.query
-      } else {
-        context.logger.error("Failed to get data from body")
-      }
-    } catch {
-      context.logger.error("Failed to decode, using raw: \(error)")
-    }
-  }
 }
 
 // https://stackoverflow.com/a/46969102
