@@ -14,7 +14,7 @@ let package = Package(
         .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "1.0.0-alpha"),
         .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", branch: "main"),
         .package(url: "https://github.com/GraphQLSwift/Graphiti.git", from: "0.24.0"),
-        .package(url: "https://github.com/awslabs/aws-sdk-swift", exact: "0.10.0"),
+        .package(url: "https://github.com/awslabs/aws-sdk-swift", branch: "main"),
     ],
     targets: [
         .executableTarget(name: "StarsAndPlanetsLambda", dependencies: [

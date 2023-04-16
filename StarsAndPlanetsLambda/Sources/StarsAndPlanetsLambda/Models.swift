@@ -58,8 +58,8 @@ struct StarsAndPlanetsContext {
 //        ]
 //      )
 //    ]
-    let input = QueryInput(tableName: starsTable)
-    let queryResult = try await client.query(input: input)
+    let input = ScanInput(tableName: starsTable)
+    let queryResult = try await client.scan(input: input)
     guard let items = queryResult.items else {
       throw ContextError.starsNotFound
     }
