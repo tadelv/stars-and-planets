@@ -46,6 +46,9 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
       on: context.eventLoop,
       variables: query.variables)
     context.logger.info("returning: \(result)")
+    if result.errors.isEmpty == false {
+      return APIGatewayV2Response(statusCode: .badRequest, body: result.description)
+    }
     return APIGatewayV2Response(statusCode: .ok, body: result.description)
   }
 
