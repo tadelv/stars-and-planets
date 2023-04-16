@@ -15,14 +15,14 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
     guard let body = request.body else {
       return .init(statusCode: .badRequest)
     }
-    context.logger.log(level: .info, "received: \(body)")
+    context.logger.info("received: \(body)")
     var query = body
     extractQuery(request, &query, body, context)
     guard query.isEmpty == false else {
       return .init(statusCode: .badRequest)
     }
 
-    context.logger.log(level: .info, "querying with: \(query)")
+    context.logger.info("querying with: \(query)")
 
     let api = StarsAPI.create()
 
@@ -31,11 +31,13 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
       try? group.syncShutdownGracefully()
     }
 
+    let apiContext = try await StarsAndPlanetsContext()
+
     let result = try await api.asyncExecute(
       request: query,
-      context: StarsAndPlanetsContext(),
+      context: apiContext,
       on: group)
-    context.logger.log(level: .info, "returning: \(result)")
+    context.logger.info("returning: \(result)")
     return APIGatewayV2Response(statusCode: .ok, body: result.description)
   }
 
@@ -48,17 +50,17 @@ struct StarsAndPlanetsLambda: SimpleLambdaHandler {
       query = body.base64Decoded() ?? ""
     }
     do {
-      context.logger.log(level: .info, "trying to decode \(body)")
+      context.logger.info("trying to decode \(body)")
       if let data = body.data(using: .utf8) {
         context.logger.log(level: .info, "extracting json")
         let queryObject = try JSONDecoder().decode(InputQuery.self, from: data)
-        context.logger.log(level: .info, "assigning: \(queryObject.query)")
+        context.logger.info("assigning: \(queryObject.query)")
         query = queryObject.query
       } else {
-        context.logger.log(level: .error, "Failed to get data from body")
+        context.logger.error("Failed to get data from body")
       }
     } catch {
-      context.logger.log(level: .error, "Failed to decode, using raw: \(error)")
+      context.logger.error("Failed to decode, using raw: \(error)")
     }
   }
 }

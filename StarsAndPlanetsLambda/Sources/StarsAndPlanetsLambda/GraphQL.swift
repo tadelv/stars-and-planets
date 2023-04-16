@@ -9,15 +9,15 @@ import Graphiti
 import GraphQL
 import NIO
 
-struct Resolver {
-  func message(context: Context, arguments: NoArguments) -> Message {
-    context.message()
-  }
-}
-
 struct StarsResolver {
-  func stars(context: StarsAndPlanetsContext, arguments: NoArguments) -> [Star] {
-    context.stars()
+  func stars(
+    context: StarsAndPlanetsContext,
+    arguments: NoArguments,
+    group: EventLoopGroup
+  ) throws -> EventLoopFuture<[Star]> {
+    group.next().makeFutureWithTask {
+      try await context.stars()
+    }
   }
 }
 
@@ -42,16 +42,11 @@ struct StarsAPI: API {
         }
 
         Query {
-          Field("stars", at: Resolver.stars)
+          Field("stars", at: StarsResolver.stars)
         }
       }
     )
   }
-}
-
-struct MessageAPI : API {
-  let resolver: Resolver
-  let schema: Schema<Resolver, Context>
 }
 
 extension API {
@@ -70,22 +65,5 @@ extension API {
         continuation.resume(throwing: error)
       }
     }
-  }
-}
-
-extension MessageAPI {
-  static func create() -> MessageAPI {
-    MessageAPI(
-      resolver: Resolver(),
-      schema: try! Schema<Resolver, Context> {
-        Type(Message.self) {
-          Field("content", at: \.content)
-        }
-
-        Query {
-          Field("message", at: Resolver.message)
-        }
-      }
-    )
   }
 }
