@@ -8,7 +8,7 @@ public class NewPlanetMutation: GraphQLMutation {
   public static let document: ApolloAPI.DocumentType = .notPersisted(
     definition: .init(
       #"""
-      mutation NewPlanet($name: String!, $starID: UUID!) {
+      mutation NewPlanet($name: String!, $starID: String!) {
         createPlanet(name: $name, starID: $starID) {
           __typename
           id
@@ -18,11 +18,11 @@ public class NewPlanetMutation: GraphQLMutation {
     ))
 
   public var name: String
-  public var starID: UUID
+  public var starID: String
 
   public init(
     name: String,
-    starID: UUID
+    starID: String
   ) {
     self.name = name
     self.starID = starID
@@ -35,7 +35,7 @@ public class NewPlanetMutation: GraphQLMutation {
 
   public struct Data: StarsAndPlanetsApollo.SelectionSet {
     public let __data: DataDict
-    public init(_dataDict data: DataDict) { __data = data }
+    public init(_dataDict: DataDict) { __data = _dataDict }
 
     public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Mutation }
     public static var __selections: [ApolloAPI.Selection] { [
@@ -52,14 +52,15 @@ public class NewPlanetMutation: GraphQLMutation {
     /// Parent Type: `Planet`
     public struct CreatePlanet: StarsAndPlanetsApollo.SelectionSet {
       public let __data: DataDict
-      public init(_dataDict data: DataDict) { __data = data }
+      public init(_dataDict: DataDict) { __data = _dataDict }
 
       public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Planet }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("id", StarsAndPlanetsApollo.UUID?.self),
+        .field("__typename", String.self),
+        .field("id", String?.self),
       ] }
 
-      public var id: StarsAndPlanetsApollo.UUID? { __data["id"] }
+      public var id: String? { __data["id"] }
     }
   }
 }

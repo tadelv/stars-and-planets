@@ -4,14 +4,14 @@ A directive used by the Apollo iOS client to annotate operations or fragments th
 directive @apollo_client_ios_localCacheMutation on QUERY | MUTATION | SUBSCRIPTION | FRAGMENT_DEFINITION
 
 type Mutation {
-  createPlanet(name: String!, starID: UUID!): Planet!
+  createPlanet(name: String!, starID: String!): Planet!
   createStar(name: String!): Star!
-  deletePlanet(id: UUID!): Boolean!
-  deleteStar(id: UUID!): Boolean!
+  deletePlanet(id: String!): Boolean!
+  deleteStar(id: String!): Boolean!
 }
 
 type Planet {
-  id: UUID
+  id: String
   name: String!
   star: Star!
 }
@@ -19,13 +19,13 @@ type Planet {
 type Query {
   planets: [Planet!]!
   stars: [Star!]!
-  starsPlanets(starID: UUID!): [Planet!]!
+  starsPlanets(starID: String!): [Planet!]!
 }
 
 type Star {
-  id: UUID
+  id: String
   name: String!
   planets: [Planet!]!
 }
 
-scalar UUID
+scalar String

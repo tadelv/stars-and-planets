@@ -9,7 +9,7 @@ query Stars {
   }
 }
 
-query PlanetsOfAStar($starID: UUID!) {
+query PlanetsOfAStar($starID: String!) {
   starsPlanets(starID: $starID) {
     id
     name
@@ -22,7 +22,7 @@ mutation NewStar($name: String!) {
   }
 }
 
-mutation NewPlanet($name: String!, $starID: UUID!) {
+mutation NewPlanet($name: String!, $starID: String!) {
   createPlanet(name: $name, starID: $starID) {
     id
   }
