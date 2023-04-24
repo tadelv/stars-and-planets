@@ -43,6 +43,38 @@ struct StarsResolver {
       try await context.createStar(arguments.name)
     }
   }
+
+  struct CreatePlanetArguments: Codable {
+    let name: String
+    let starID: String
+  }
+
+  func createPlanet(
+    context: StarsAndPlanetsContext,
+    arguments: CreatePlanetArguments,
+    group: EventLoopGroup
+  ) throws -> EventLoopFuture<Planet> {
+    group.next().makeFutureWithTask {
+      try await context.createPlanet(
+        arguments.name,
+        starId: arguments.starID
+      )
+    }
+  }
+
+  struct PlanetsForStarArguments: Codable {
+    let starID: String
+  }
+
+  func starsPlanets(
+    context: StarsAndPlanetsContext,
+    arguments: PlanetsForStarArguments,
+    group: EventLoopGroup
+  ) throws -> EventLoopFuture<[Planet]> {
+    group.next().makeFutureWithTask {
+      try await context.planetsOfAStar(arguments.starID)
+    }
+  }
 }
 
 struct StarsAPI: API {
@@ -68,11 +100,19 @@ struct StarsAPI: API {
         Query {
           Field("stars", at: StarsResolver.stars)
           Field("planets", at: StarsResolver.planets)
+          Field("starsPlanets", at: StarsResolver.starsPlanets) {
+            Argument("starID", at: \.starID)
+          }
         }
 
         Mutation {
           Field("createStar", at: StarsResolver.createStar) {
             Argument("name", at: \.name)
+          }
+
+          Field("createPlanet", at: StarsResolver.createPlanet) {
+            Argument("name", at: \.name)
+            Argument("starID", at: \.starID)
           }
         }
       }
