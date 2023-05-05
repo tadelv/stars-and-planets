@@ -8,7 +8,7 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
   public static let document: ApolloAPI.DocumentType = .notPersisted(
     definition: .init(
       #"""
-      query PlanetsOfAStar($starID: UUID!) {
+      query PlanetsOfAStar($starID: String!) {
         starsPlanets(starID: $starID) {
           __typename
           id
@@ -18,9 +18,9 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
       """#
     ))
 
-  public var starID: UUID
+  public var starID: String
 
-  public init(starID: UUID) {
+  public init(starID: String) {
     self.starID = starID
   }
 
@@ -28,7 +28,7 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
 
   public struct Data: StarsAndPlanetsApollo.SelectionSet {
     public let __data: DataDict
-    public init(data: DataDict) { __data = data }
+    public init(_dataDict: DataDict) { __data = _dataDict }
 
     public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
@@ -42,15 +42,16 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
     /// Parent Type: `Planet`
     public struct StarsPlanet: StarsAndPlanetsApollo.SelectionSet {
       public let __data: DataDict
-      public init(data: DataDict) { __data = data }
+      public init(_dataDict: DataDict) { __data = _dataDict }
 
       public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Planet }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("id", StarsAndPlanetsApollo.UUID?.self),
+        .field("__typename", String.self),
+        .field("id", String?.self),
         .field("name", String.self),
       ] }
 
-      public var id: StarsAndPlanetsApollo.UUID? { __data["id"] }
+      public var id: String? { __data["id"] }
       public var name: String { __data["name"] }
     }
   }

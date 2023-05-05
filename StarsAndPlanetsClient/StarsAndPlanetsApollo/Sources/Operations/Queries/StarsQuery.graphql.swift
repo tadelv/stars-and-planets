@@ -27,7 +27,7 @@ public class StarsQuery: GraphQLQuery {
 
   public struct Data: StarsAndPlanetsApollo.SelectionSet {
     public let __data: DataDict
-    public init(data: DataDict) { __data = data }
+    public init(_dataDict: DataDict) { __data = _dataDict }
 
     public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
@@ -41,16 +41,17 @@ public class StarsQuery: GraphQLQuery {
     /// Parent Type: `Star`
     public struct Star: StarsAndPlanetsApollo.SelectionSet {
       public let __data: DataDict
-      public init(data: DataDict) { __data = data }
+      public init(_dataDict: DataDict) { __data = _dataDict }
 
       public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Star }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("id", StarsAndPlanetsApollo.UUID?.self),
+        .field("__typename", String.self),
+        .field("id", String?.self),
         .field("name", String.self),
         .field("planets", [Planet].self),
       ] }
 
-      public var id: StarsAndPlanetsApollo.UUID? { __data["id"] }
+      public var id: String? { __data["id"] }
       public var name: String { __data["name"] }
       public var planets: [Planet] { __data["planets"] }
 
@@ -59,15 +60,16 @@ public class StarsQuery: GraphQLQuery {
       /// Parent Type: `Planet`
       public struct Planet: StarsAndPlanetsApollo.SelectionSet {
         public let __data: DataDict
-        public init(data: DataDict) { __data = data }
+        public init(_dataDict: DataDict) { __data = _dataDict }
 
         public static var __parentType: ApolloAPI.ParentType { StarsAndPlanetsApollo.Objects.Planet }
         public static var __selections: [ApolloAPI.Selection] { [
-          .field("id", StarsAndPlanetsApollo.UUID?.self),
+          .field("__typename", String.self),
+          .field("id", String?.self),
           .field("name", String.self),
         ] }
 
-        public var id: StarsAndPlanetsApollo.UUID? { __data["id"] }
+        public var id: String? { __data["id"] }
         public var name: String { __data["name"] }
       }
     }

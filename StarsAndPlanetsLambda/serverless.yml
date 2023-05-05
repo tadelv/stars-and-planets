@@ -1,0 +1,83 @@
+service: stars-and-planets-lambda
+
+package:
+    artifact: .build/lambda/StarsAndPlanetsLambda/lambda.zip
+
+provider:
+    name: aws
+    runtime: provided.al2
+    architecture: arm64
+    region: eu-central-1
+    environment:
+        STARS_TABLE: !Ref StarsTable
+        PLANETS_TABLE: !Ref PlanetsTable
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+          Resource: "*"
+        - Effect: Allow
+          Action:
+              - dynamodb:DescribeTable
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+          Resource: !GetAtt StarsTable.Arn
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: !GetAtt PlanetsTable.Arn
+
+functions:
+    query:
+        handler: StarsAndPlanetsLambda.handler
+        memorySize: 128
+        events:
+          - httpApi:
+              path: /graphql
+              method: post
+
+resources:
+    Resources:
+      StarsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          TableName: StarsTable
+          AttributeDefinitions:
+            - AttributeName: starId
+              AttributeType: S
+          KeySchema:
+            - AttributeName: starId
+              KeyType: HASH
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      
+      PlanetsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          TableName: PlanetsTable
+          AttributeDefinitions:
+            - AttributeName: planetId
+              AttributeType: S
+            - AttributeName: starId
+              AttributeType: S
+          KeySchema:
+            - AttributeName: planetId
+              KeyType: HASH
+            - AttributeName: starId
+              KeyType: RANGE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
