@@ -1,0 +1,23 @@
+name: Package Lambda
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      working-directory: "./StarsAndPlanetsLambda"
+      run: |
+        docker build . -t builder 
+        docker run --rm -v "$(pwd)":/workspace -w /workspace builder bash -cl "swift build --product StarsAndPlanetsLambda -c release -Xswiftc -g"
+
+      
