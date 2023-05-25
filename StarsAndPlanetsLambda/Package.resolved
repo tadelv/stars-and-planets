@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/awslabs/aws-crt-swift",
       "state" : {
-        "revision" : "a4d1f4b96ddecb2559966761ec070ce9caa2532f",
-        "version" : "0.9.0"
+        "revision" : "838deb5de707f157986e4baa95439cbcac9f3fcf",
+        "version" : "0.12.0"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/awslabs/aws-sdk-swift",
       "state" : {
         "branch" : "main",
-        "revision" : "5131808c33d0b74a8863b48a2031e472959197e2"
+        "revision" : "170d0219b0aba7f027c03b27a3b81bc0750f8d34"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/awslabs/smithy-swift",
       "state" : {
-        "revision" : "08e6080c351c497cbcf2a3a7332f19ff3365423d",
-        "version" : "0.17.0"
+        "revision" : "9ad19d30e6fb65b9414ad4d38528e84974098fd1",
+        "version" : "0.20.0"
       }
     },
     {
@@ -60,7 +60,7 @@
       "location" : "https://github.com/swift-server/swift-aws-lambda-events.git",
       "state" : {
         "branch" : "main",
-        "revision" : "e6eb6daebad8aaa09d5d82ec38b04086015acd0e"
+        "revision" : "5912b9ec835663d8b8155e12c3c89b754f7f8ad3"
       }
     },
     {
@@ -104,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "e0cc6dd6ffa8e6a6f565938acd858b24e47902d0",
-        "version" : "2.50.0"
+        "revision" : "2d8e6ca36fe3e8ed74b0883f593757a45463c34d",
+        "version" : "2.53.0"
       }
     },
     {
@@ -113,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/MaxDesiatov/XMLCoder.git",
       "state" : {
-        "revision" : "666227de3b4cf4adcce7c70b8b89f98c7df02754",
-        "version" : "0.16.0"
+        "revision" : "80b4a1646399b8e4e0ce80711653476a85bd5e37",
+        "version" : "0.17.0"
       }
     }
   ],
