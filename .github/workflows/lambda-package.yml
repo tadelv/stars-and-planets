@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: cd StarsAndPlanetsLambda |
+      run: cwd StarsAndPlanetsLambda |
         docker build --platform="linux/arm64" . -t builder |
         docker run --platform="linux/arm64" --rm -v "$(pwd)":/workspace -w /workspace builder bash -cl "swift build --product StarsAndPlanetsLambda -c release -Xswiftc -g"
 
