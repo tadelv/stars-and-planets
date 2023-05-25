@@ -1,29 +1,34 @@
 query Stars {
   stars {
     id
-    name
-    planets {
-      id
-      name
-    }
+    ...StarDetails
   }
 }
 
 query PlanetsOfAStar($starID: String!) {
   starsPlanets(starID: $starID) {
     id
-    name
+    ...PlanetDetails
   }
 }
 
 mutation NewStar($name: String!) {
   createStar(name: $name) {
     id
+    ...StarDetails
   }
 }
 
 mutation NewPlanet($name: String!, $starID: String!) {
   createPlanet(name: $name, starID: $starID) {
     id
+    ...PlanetDetails
+  }
+}
+
+mutation NewStarLocalCacheMutation($name: String!) @apollo_client_ios_localCacheMutation {
+  createStar(name: $name) {
+    id
+    ...MutableStarDetails
   }
 }

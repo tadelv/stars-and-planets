@@ -12,10 +12,11 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
         starsPlanets(starID: $starID) {
           __typename
           id
-          name
+          ...PlanetDetails
         }
       }
-      """#
+      """#,
+      fragments: [PlanetDetails.self]
     ))
 
   public var starID: String
@@ -48,11 +49,18 @@ public class PlanetsOfAStarQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("id", String?.self),
-        .field("name", String.self),
+        .fragment(PlanetDetails.self),
       ] }
 
       public var id: String? { __data["id"] }
       public var name: String { __data["name"] }
+
+      public struct Fragments: FragmentContainer {
+        public let __data: DataDict
+        public init(_dataDict: DataDict) { __data = _dataDict }
+
+        public var planetDetails: PlanetDetails { _toFragment() }
+      }
     }
   }
 }

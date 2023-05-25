@@ -73,7 +73,33 @@ extension Client: DependencyKey {
         Planet(id: $0.id!, name: $0.name)
       }
     } createStar: { name in
-      _ = try await apolloClient.performAsync(mutation: NewStarMutation(name: name))
+      let data = try await apolloClient.performAsync(mutation: NewStarMutation(name: name))
+      apolloClient.store.withinReadWriteTransaction { transaction in
+//        let mutation = NewStarLocalCacheMutation(name: name)
+//        try transaction.update(mutation) { updateData in
+//          updateData.createStar.id = data.createStar.id!
+//          updateData.createStar.name = name
+//          updateData.createStar.planets = []
+//        }
+        let details = try transaction.readObject(ofType: StarDetails.self,
+                                                 withKey: "StarDetails:"+data.createStar.id!)
+        try transaction.updateObject(
+          ofType: MutableStarDetails.self,
+          withKey: data.createStar.id!
+        ) { star in
+          star.id = data.createStar.id!
+          star.name = name
+          star.planets = []
+        }
+      } completion: { result in
+        dump(result)
+        apolloClient.store.withinReadTransaction { transaction in
+          let stars = try transaction.read(query: StarsQuery()).stars
+          dump(stars.map(\.name))
+        } completion: { result in
+          print("query: \(result)")
+        }
+      }
       return true
     } createPlanet: { star, name in
       _ = try await apolloClient.performAsync(mutation: NewPlanetMutation(name: name, starID: star.id))
@@ -92,7 +118,10 @@ extension DependencyValues {
 extension ApolloClient {
   struct NoData: Error {}
 
-  func fetchAsync<Query: GraphQLQuery>(query: Query, cachePolicy: CachePolicy = .fetchIgnoringCacheData) async throws -> Query.Data {
+  func fetchAsync<Query: GraphQLQuery>(
+    query: Query,
+    cachePolicy: CachePolicy = .returnCacheDataElseFetch //.fetchIgnoringCacheCompletely
+  ) async throws -> Query.Data {
     try await withCheckedThrowingContinuation { continuation in
       self.fetch(query: query, cachePolicy: cachePolicy) { result in
         continuation.resume(

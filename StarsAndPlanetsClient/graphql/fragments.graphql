@@ -1,0 +1,22 @@
+fragment PlanetDetails on Planet {
+  id
+  name
+}
+
+fragment StarDetails on Star {
+  id
+  name
+  planets {
+    id
+    ...PlanetDetails
+  }
+}
+
+fragment MutableStarDetails on Star @apollo_client_ios_localCacheMutation {
+    id
+    name
+    planets {
+        id
+        ...PlanetDetails
+    }
+}

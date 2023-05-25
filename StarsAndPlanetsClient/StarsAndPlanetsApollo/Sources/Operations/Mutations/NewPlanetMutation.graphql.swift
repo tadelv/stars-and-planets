@@ -12,9 +12,11 @@ public class NewPlanetMutation: GraphQLMutation {
         createPlanet(name: $name, starID: $starID) {
           __typename
           id
+          ...PlanetDetails
         }
       }
-      """#
+      """#,
+      fragments: [PlanetDetails.self]
     ))
 
   public var name: String
@@ -58,9 +60,18 @@ public class NewPlanetMutation: GraphQLMutation {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("id", String?.self),
+        .fragment(PlanetDetails.self),
       ] }
 
       public var id: String? { __data["id"] }
+      public var name: String { __data["name"] }
+
+      public struct Fragments: FragmentContainer {
+        public let __data: DataDict
+        public init(_dataDict: DataDict) { __data = _dataDict }
+
+        public var planetDetails: PlanetDetails { _toFragment() }
+      }
     }
   }
 }

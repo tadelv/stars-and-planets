@@ -150,7 +150,6 @@ struct StarsAndPlanetsContext {
             case let .s(starId) = $0["starId"] else {
         return nil
       }
-      //      Star(id: $0["id"], name: $0["name"], planets: [])
       return Planet(id: id, name: name, starId: starId)
     }
   }
